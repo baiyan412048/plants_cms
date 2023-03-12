@@ -20,13 +20,6 @@ const client = new ImgurClient({
 
 const images = reactive([])
 
-const getImages = async () => {
-  const { isFetching, error, data } = await useFetch(
-    'https://api.baiyan777.com/api/image'
-  )
-  console.log(data, 'getImages')
-}
-
 const deleteImage = async (hash) => {
   // 刪除圖片
   const { data } = await useFetch(`http://localhost:3000/api/image/${hash}`)
@@ -53,7 +46,7 @@ const uploadImage = async (event) => {
   // https://api.baiyan777.com/api/image
 }
 
-onBeforeMount(async () => {
+await useAsyncData(async () => {
   try {
     const { data } = await client.getAlbum('a15Lk0o')
     images.push(...data.images)
@@ -100,7 +93,6 @@ onBeforeMount(async () => {
             <PlusIcon class="mr-2 h-4 w-4" />
             Add Image
           </label>
-          <button @click="getImages">Get Image</button>
         </div>
       </div>
     </div>

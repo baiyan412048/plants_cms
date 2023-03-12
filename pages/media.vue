@@ -1,5 +1,7 @@
 <script setup>
+import { useFileSizeFormat } from '@/stores/filters'
 import { useFetch } from '@vueuse/core'
+
 import {
   TrashIcon,
   MagnifyingGlassIcon,
@@ -7,6 +9,9 @@ import {
 } from '@heroicons/vue/24/solid'
 
 import ImgurClient from 'imgur'
+
+const fileSizeFormat = useFileSizeFormat()
+
 const client = new ImgurClient({
   clientId: '81bcc5e89b004a1',
   clientSecret: 'a7b1bb8fb635ff9ab336b2eceff2a82f619c7dc7',
@@ -25,10 +30,13 @@ const getImages = async () => {
 }
 
 const deleteImage = async (hash) => {
-  const { isFetching, error, data } = await useFetch(
-    `http://localhost:3000/api/image/${hash}`
-  ).delete()
-  console.log(hash, data, 'deleteImage')
+  // 刪除圖片
+  await useFetch(`http://localhost:3000/api/image/${hash}`).delete()
+  // 更新 images 內容
+  images.splice(
+    images.findIndex((obj) => obj.deletehash == hash),
+    1
+  )
 }
 
 const uploadImage = async (event) => {
@@ -43,8 +51,12 @@ const uploadImage = async (event) => {
 }
 
 onBeforeMount(async () => {
-  const { data } = await client.getAlbum('a15Lk0o')
-  images.push(...data.images)
+  try {
+    const { data } = await client.getAlbum('a15Lk0o')
+    images.push(...data.images)
+  } catch (error) {
+    console.error(error)
+  }
 })
 </script>
 
@@ -68,7 +80,7 @@ onBeforeMount(async () => {
               <input
                 id="simple-search"
                 type="text"
-                class="focus:border-primary-500 focus:ring-primary-500 dark:focus:border-primary-500 dark:focus:ring-primary-500 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 pl-10 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400"
+                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 pl-10 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
                 placeholder="Search"
                 required=""
               />
@@ -79,7 +91,7 @@ onBeforeMount(async () => {
           class="flex w-full shrink-0 flex-col items-stretch justify-end space-y-2 md:w-auto md:flex-row md:items-center md:space-y-0 md:space-x-3"
         >
           <label
-            class="bg-primary-700 hover:bg-primary-800 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-4"
+            class="flex cursor-pointer items-center justify-center rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
           >
             <input type="file" class="hidden" @change="uploadImage" />
             <PlusIcon class="mr-2 h-4 w-4" />
@@ -89,7 +101,7 @@ onBeforeMount(async () => {
         </div>
       </div>
     </div>
-    <ul class="mb-6 grid gap-8 p-5 md:grid-cols-3 lg:mb-16">
+    <ul class="mb-6 grid gap-8 p-5 md:grid-cols-4 lg:mb-16">
       <li v-for="(image, key) in images" :key="key" class="">
         <div class="rounded-lg bg-white shadow dark:bg-gray-800">
           <div class="relative">
@@ -113,13 +125,18 @@ onBeforeMount(async () => {
               >
                 {{ image.type }}</span
               >
+              <span
+                class="mr-2 rounded bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300"
+              >
+                {{ fileSizeFormat.formatBytes(image.size) }}</span
+              >
             </div>
             <p
-              class="break-words text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+              class="break-words text-lg font-bold tracking-tight text-gray-900 dark:text-white"
             >
               {{ image.name }}
             </p>
-            <pre>{{ image }}</pre>
+            <!-- <pre>{{ image }}</pre> -->
           </div>
         </div>
       </li>
@@ -174,7 +191,7 @@ onBeforeMount(async () => {
           <a
             href="#"
             aria-current="page"
-            class="border-primary-300 bg-primary-50 text-primary-600 hover:bg-primary-100 hover:text-primary-700 z-10 flex items-center justify-center border px-3 py-2 text-sm leading-tight dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+            class="z-10 flex items-center justify-center border border-primary-300 bg-primary-50 px-3 py-2 text-sm leading-tight text-primary-600 hover:bg-primary-100 hover:text-primary-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
             >3</a
           >
         </li>

@@ -18,8 +18,6 @@ const client = new ImgurClient({
   refreshToken: '4024a39b10347625f761505d9f1ca29395f80637'
 })
 
-const image = ref(null)
-
 const images = reactive([])
 
 const getImages = async () => {
@@ -31,7 +29,10 @@ const getImages = async () => {
 
 const deleteImage = async (hash) => {
   // 刪除圖片
-  await useFetch(`http://localhost:3000/api/image/${hash}`).delete()
+  const { data } = await useFetch(`http://localhost:3000/api/image/${hash}`)
+    .delete()
+    .json()
+  console.log(data.value, 'deleteImage')
   // 更新 images 內容
   images.splice(
     images.findIndex((obj) => obj.deletehash == hash),
@@ -40,13 +41,15 @@ const deleteImage = async (hash) => {
 }
 
 const uploadImage = async (event) => {
-  let formData = new FormData()
+  const formData = new FormData()
   formData.append('files', event.target.files[0])
   formData.append('name', event.target.files[0].name)
-  const { isFetching, error, data } = await useFetch(
-    'http://localhost:3000/api/image'
-  ).post(formData, null)
-  console.log(data, 'uploadImage')
+  const { data } = await useFetch('http://localhost:3000/api/image/')
+    .post(formData, null)
+    .json()
+  console.log(data.value, data.value.data, 'uploadImage')
+  images.push(...data.value.data)
+  // http://localhost:3000/api/image/
   // https://api.baiyan777.com/api/image
 }
 
@@ -136,7 +139,7 @@ onBeforeMount(async () => {
             >
               {{ image.name }}
             </p>
-            <!-- <pre>{{ image }}</pre> -->
+            <pre>{{ image }}</pre>
           </div>
         </div>
       </li>

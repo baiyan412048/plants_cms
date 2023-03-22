@@ -89,7 +89,7 @@
                 id="topbar-search"
                 type="text"
                 name="email"
-                class="focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-500 dark:focus:border-primary-500 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 sm:text-sm"
+                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500 sm:text-sm"
                 placeholder="Search"
               />
             </div>
@@ -98,7 +98,7 @@
         <div class="flex items-center lg:order-2">
           <button
             type="button"
-            class="bg-primary-700 hover:bg-primary-800 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 mr-2 hidden items-center justify-center rounded-lg px-3 py-1.5 text-xs font-medium text-white focus:outline-none focus:ring-4 sm:inline-flex"
+            class="mr-2 hidden items-center justify-center rounded-lg bg-primary-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 sm:inline-flex"
           >
             <svg
               aria-hidden="true"
@@ -178,7 +178,7 @@
                     alt="Bonnie Green avatar"
                   />
                   <div
-                    class="bg-primary-700 absolute ml-6 -mt-5 flex h-5 w-5 items-center justify-center rounded-full border border-white dark:border-gray-700"
+                    class="absolute ml-6 -mt-5 flex h-5 w-5 items-center justify-center rounded-full border border-white bg-primary-700 dark:border-gray-700"
                   >
                     <svg
                       aria-hidden="true"
@@ -206,7 +206,7 @@
                     >: "Hey, what's up? All set for the presentation?"
                   </div>
                   <div
-                    class="text-primary-700 dark:text-primary-400 text-xs font-medium"
+                    class="text-xs font-medium text-primary-700 dark:text-primary-400"
                   >
                     a few moments ago
                   </div>
@@ -252,7 +252,7 @@
                     started following you.
                   </div>
                   <div
-                    class="text-primary-700 dark:text-primary-400 text-xs font-medium"
+                    class="text-xs font-medium text-primary-700 dark:text-primary-400"
                   >
                     10 minutes ago
                   </div>
@@ -300,7 +300,7 @@
                     love your story. See it and view more stories.
                   </div>
                   <div
-                    class="text-primary-700 dark:text-primary-400 text-xs font-medium"
+                    class="text-xs font-medium text-primary-700 dark:text-primary-400"
                   >
                     44 minutes ago
                   </div>
@@ -343,13 +343,13 @@
                     >
                     mentioned you in a comment:
                     <span
-                      class="text-primary-700 dark:text-primary-500 font-medium"
+                      class="font-medium text-primary-700 dark:text-primary-500"
                       >@bonnie.green</span
                     >
                     what do you say?
                   </div>
                   <div
-                    class="text-primary-700 dark:text-primary-400 text-xs font-medium"
+                    class="text-xs font-medium text-primary-700 dark:text-primary-400"
                   >
                     1 hour ago
                   </div>
@@ -392,7 +392,7 @@
                     the new design trend.
                   </div>
                   <div
-                    class="text-primary-700 dark:text-primary-400 text-xs font-medium"
+                    class="text-xs font-medium text-primary-700 dark:text-primary-400"
                   >
                     3 hours ago
                   </div>
@@ -729,7 +729,7 @@
                   <span class="flex items-center">
                     <svg
                       aria-hidden="true"
-                      class="text-primary-600 dark:text-primary-500 mr-2 h-5 w-5"
+                      class="mr-2 h-5 w-5 text-primary-600 dark:text-primary-500"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                       xmlns="http://www.w3.org/2000/svg"

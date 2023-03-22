@@ -46,7 +46,7 @@ const uploadImage = async (event) => {
   // https://api.baiyan777.com/api/image
 }
 
-await useAsyncData(async () => {
+onBeforeMount(async () => {
   try {
     const { data } = await client.getAlbum('a15Lk0o')
     images.push(...data.images)
@@ -131,7 +131,7 @@ await useAsyncData(async () => {
             >
               {{ image.name }}
             </p>
-            <pre>{{ image }}</pre>
+            <!-- <pre>{{ image }}</pre> -->
           </div>
         </div>
       </li>

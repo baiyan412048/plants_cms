@@ -1,10 +1,12 @@
 <script setup>
-import { useArticleGetOutlines } from '@/stores/article/useArticleGetOutlines'
+import { useArticleGetCatalogs, useArticleGetOutlines } from '@/stores/article'
 
+const articleCatalogsStore = useArticleGetCatalogs()
 const articleOutlineStore = useArticleGetOutlines()
 
 onBeforeMount(() => {
-  articleOutlineStore.fetchArticleOutlines()
+  articleCatalogsStore.getArticleCatalogs()
+  articleOutlineStore.getArticleOutlines()
 })
 </script>
 
@@ -12,7 +14,7 @@ onBeforeMount(() => {
   <div
     class="relative overflow-hidden bg-white shadow-md dark:bg-gray-800 sm:rounded-lg"
   >
-    <TableNavbar />
+    <TableNavbar :catalogs="articleCatalogsStore.articleCatalogs" />
     <TableContainer :list="articleOutlineStore.articleOutlines" />
     <!-- <TableFooter /> -->
   </div>

@@ -1,6 +1,6 @@
 <script setup>
 import { useFileSizeFormat } from '@/stores/filters'
-import { useFetch } from '@vueuse/core'
+import { useMediaStore } from '@/stores/media'
 
 import {
   TrashIcon,
@@ -8,51 +8,14 @@ import {
   PlusIcon
 } from '@heroicons/vue/24/solid'
 
-import ImgurClient from 'imgur'
+// media store
+const mediaStore = useMediaStore()
 
 const fileSizeFormat = useFileSizeFormat()
 
-const client = new ImgurClient({
-  clientId: '81bcc5e89b004a1',
-  clientSecret: 'a7b1bb8fb635ff9ab336b2eceff2a82f619c7dc7',
-  refreshToken: '4024a39b10347625f761505d9f1ca29395f80637'
-})
-
-const images = reactive([])
-
-const deleteImage = async (hash) => {
-  // 刪除圖片
-  const { data } = await useFetch(`http://localhost:3000/api/image/${hash}`)
-    .delete()
-    .json()
-  console.log(data.value, 'deleteImage')
-  // 更新 images 內容
-  images.splice(
-    images.findIndex((obj) => obj.deletehash == hash),
-    1
-  )
-}
-
-const uploadImage = async (event) => {
-  const formData = new FormData()
-  formData.append('files', event.target.files[0])
-  formData.append('name', event.target.files[0].name)
-  const { data } = await useFetch('http://localhost:3000/api/image/')
-    .post(formData, null)
-    .json()
-  console.log(data.value, data.value.data, 'uploadImage')
-  images.push(...data.value.data)
-  // http://localhost:3000/api/image/
-  // https://api.baiyan777.com/api/image
-}
-
-onBeforeMount(async () => {
-  try {
-    const { data } = await client.getAlbum('a15Lk0o')
-    images.push(...data.images)
-  } catch (error) {
-    console.error(error)
-  }
+onBeforeMount(() => {
+  // 取得所有圖片
+  mediaStore.getImages()
 })
 </script>
 
@@ -89,15 +52,19 @@ onBeforeMount(async () => {
           <label
             class="flex cursor-pointer items-center justify-center rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
           >
-            <input type="file" class="hidden" @change="uploadImage" />
+            <input
+              type="file"
+              class="hidden"
+              @change="mediaStore.uploadImage"
+            />
             <PlusIcon class="mr-2 h-4 w-4" />
-            Add Image
+            新增圖片
           </label>
         </div>
       </div>
     </div>
     <ul class="mb-6 grid gap-8 p-5 md:grid-cols-4 lg:mb-16">
-      <li v-for="(image, key) in images" :key="key" class="">
+      <li v-for="(image, key) in mediaStore.images" :key="key">
         <div class="rounded-lg bg-white shadow dark:bg-gray-800">
           <div class="relative">
             <img
@@ -108,7 +75,7 @@ onBeforeMount(async () => {
             />
             <div
               class="absolute bottom-2 right-2 z-10 cursor-pointer rounded-full bg-red-500 p-2"
-              @click="deleteImage(image.deletehash)"
+              @click="mediaStore.deleteImage(image.deletehash)"
             >
               <TrashIcon class="h-5 w-5 text-white" />
             </div>

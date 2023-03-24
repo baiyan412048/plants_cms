@@ -4,6 +4,15 @@ import {
   PlusIcon,
   FunnelIcon
 } from '@heroicons/vue/24/solid'
+
+const props = defineProps({
+  catalogs: {
+    type: Array,
+    default() {
+      return []
+    }
+  }
+})
 </script>
 
 <template>
@@ -113,11 +122,12 @@ import {
             id="filterDropdown"
             class="z-10 hidden w-48 rounded-lg bg-white p-3 shadow dark:bg-gray-700"
           >
-            <h6 class="mb-3 text-sm font-medium text-gray-900 dark:text-white">
-              Category
-            </h6>
             <ul class="space-y-2 text-sm" aria-labelledby="dropdownDefault">
-              <li class="flex items-center">
+              <li
+                v-for="(catalog, key) in catalogs"
+                :key="key"
+                class="flex items-center"
+              >
                 <input
                   id="apple"
                   type="checkbox"
@@ -128,50 +138,7 @@ import {
                   for="apple"
                   class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100"
                 >
-                  Apple (56)
-                </label>
-              </li>
-              <li class="flex items-center">
-                <input
-                  id="fitbit"
-                  type="checkbox"
-                  value=""
-                  class="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
-                />
-                <label
-                  for="fitbit"
-                  class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  Fitbit (56)
-                </label>
-              </li>
-              <li class="flex items-center">
-                <input
-                  id="dell"
-                  type="checkbox"
-                  value=""
-                  class="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
-                />
-                <label
-                  for="dell"
-                  class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  Dell (56)
-                </label>
-              </li>
-              <li class="flex items-center">
-                <input
-                  id="asus"
-                  type="checkbox"
-                  value=""
-                  checked
-                  class="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
-                />
-                <label
-                  for="asus"
-                  class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  Asus (97)
+                  {{ catalog.catalog }}
                 </label>
               </li>
             </ul>

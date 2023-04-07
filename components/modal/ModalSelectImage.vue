@@ -5,6 +5,8 @@ import { useMediaStore } from '@/stores/media'
 // media store
 const mediaStore = useMediaStore()
 
+const emit = defineEmits(['selectImage', 'toggleModal'])
+
 onBeforeMount(() => {
   // 取得所有圖片
   mediaStore.getImages()
@@ -14,9 +16,8 @@ onBeforeMount(() => {
 <template>
   <div
     id="mediaModal"
-    tabindex="-1"
-    aria-hidden="true"
-    class="fixed top-0 left-0 right-0 z-50 hidden h-[calc(100%-1rem)] w-full overflow-x-hidden p-4 md:inset-0 md:h-full"
+    class="fixed top-0 left-0 right-0 z-50 flex h-[calc(100%-1rem)] w-full items-center justify-center overflow-x-hidden bg-gray-900 bg-opacity-50 p-4 dark:bg-opacity-80 md:inset-0 md:h-full"
+    role="dialog"
   >
     <div class="relative h-full w-full max-w-2xl md:h-auto">
       <!-- Modal content -->
@@ -29,9 +30,9 @@ onBeforeMount(() => {
             已上傳圖片
           </h3>
           <button
-            data-modal-hide="mediaModal"
             type="button"
             class="ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
+            @click="$emit('toggleModal')"
           >
             <svg
               aria-hidden="true"
@@ -56,9 +57,10 @@ onBeforeMount(() => {
           <div
             v-for="(image, key) in mediaStore.images"
             :key="key"
-            class="rounded-lg bg-white shadow dark:bg-gray-800"
+            class="modal-images relative rounded-lg bg-white shadow dark:bg-gray-800"
+            @click="$emit('selectImage', $event, image.link)"
           >
-            <div class="relative">
+            <div class="pointer-events-none relative">
               <img
                 class="rounded-t-lg"
                 :src="image.link"
@@ -66,7 +68,7 @@ onBeforeMount(() => {
                 referrerpolicy="no-referrer"
               />
             </div>
-            <div class="p-2">
+            <div class="pointer-events-none p-2">
               <p
                 class="break-words text-sm tracking-tight text-gray-900 dark:text-white"
               >
@@ -89,9 +91,9 @@ onBeforeMount(() => {
               選取
             </button>
             <button
-              data-modal-hide="mediaModal"
               type="button"
               class="rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:z-10 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-600"
+              @click="$emit('toggleModal')"
             >
               取消
             </button>
@@ -112,3 +114,18 @@ onBeforeMount(() => {
     </div>
   </div>
 </template>
+
+<style>
+.modal-images.active::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  display: block;
+  border: 2px solid rgb(3 105 161 / 0.5);
+  border-radius: 0.5rem;
+  width: 100%;
+  height: 100%;
+  content: '';
+}
+</style>

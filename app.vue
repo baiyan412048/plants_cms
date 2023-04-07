@@ -1,5 +1,6 @@
 <template>
   <div>
+    <NuxtLoadingIndicator />
     <BaseNavbar />
     <div class="flex">
       <BaseAside />

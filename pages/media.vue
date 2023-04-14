@@ -8,15 +8,12 @@ import {
   PlusIcon
 } from '@heroicons/vue/24/solid'
 
+// 圖片尺寸單位
+const fileSizeFormat = useFileSizeFormat()
 // media store
 const mediaStore = useMediaStore()
-
-const fileSizeFormat = useFileSizeFormat()
-
-onBeforeMount(() => {
-  // 取得所有圖片
-  mediaStore.getImages()
-})
+// 取得所有圖片
+await mediaStore.getImages()
 </script>
 
 <template>

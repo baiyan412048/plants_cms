@@ -1,21 +1,60 @@
 <script setup>
-import { PlusIcon } from '@heroicons/vue/24/solid'
+import { PlusIcon, CheckCircleIcon } from '@heroicons/vue/24/solid'
 import { useMediaStore } from '@/stores/media'
+
+const props = defineProps({
+  selectedImage: {
+    type: Array,
+    default() {
+      return []
+    }
+  },
+  limit: {
+    type: Number,
+    default() {
+      return 1
+    }
+  }
+})
+
+const { selectedImage, limit } = toRefs(props)
+
+const emit = defineEmits(['updateImage', 'cancelSelectImage', 'toggleModal'])
 
 // media store
 const mediaStore = useMediaStore()
+// 取得所有圖片
+await mediaStore.getImages()
 
-const emit = defineEmits(['selectImage', 'toggleModal'])
+const modalImages = reactive([])
 
-onBeforeMount(() => {
-  // 取得所有圖片
-  mediaStore.getImages()
+const toggleSelectImage = (id) => {
+  const $select = modalImages.find((obj) => obj.id == id)
+  $select.selected = !$select.selected
+  // 最大選取數量
+  if (modalImages.filter((obj) => obj.selected).length > limit) {
+    $select.selected = !$select.selected
+  }
+}
+
+onMounted(async () => {
+  modalImages.splice(0, modalImages.length)
+  modalImages.splice(
+    0,
+    modalImages.length,
+    ...mediaStore.images.map((obj) => {
+      obj.selected = false
+      if (selectedImage.value.includes(obj.link)) {
+        obj.selected = true
+      }
+      return obj
+    })
+  )
 })
 </script>
 
 <template>
   <div
-    id="mediaModal"
     class="fixed top-0 left-0 right-0 z-50 flex h-[calc(100%-1rem)] w-full items-center justify-center overflow-x-hidden bg-gray-900 bg-opacity-50 p-4 dark:bg-opacity-80 md:inset-0 md:h-full"
     role="dialog"
   >
@@ -55,11 +94,16 @@ onBeforeMount(() => {
           class="grid max-h-[60vh] grid-cols-2 gap-4 overflow-y-auto p-6 md:grid-cols-3"
         >
           <div
-            v-for="(image, key) in mediaStore.images"
+            v-for="(image, key) in modalImages"
             :key="key"
             class="modal-images relative rounded-lg bg-white shadow dark:bg-gray-800"
-            @click="$emit('selectImage', $event, image.link)"
+            :class="{ active: image.selected }"
+            @click="toggleSelectImage(image.id)"
           >
+            <CheckCircleIcon
+              v-show="image.selected"
+              class="absolute top-1 right-1 z-10 h-6 w-6 rounded-full bg-white text-primary-700"
+            />
             <div class="pointer-events-none relative">
               <img
                 class="rounded-t-lg"
@@ -84,16 +128,16 @@ onBeforeMount(() => {
         >
           <div class="flex items-center space-x-2">
             <button
-              data-modal-hide="mediaModal"
               type="button"
               class="rounded-lg bg-primary-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+              @click="$emit('updateImage', modalImages)"
             >
               選取
             </button>
             <button
               type="button"
               class="rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:z-10 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-600"
-              @click="$emit('toggleModal')"
+              @click="$emit('cancelSelectImage', modalImages)"
             >
               取消
             </button>
@@ -122,7 +166,7 @@ onBeforeMount(() => {
   left: 0;
   z-index: 10;
   display: block;
-  border: 2px solid rgb(3 105 161 / 0.5);
+  border: 2px solid #0369a1;
   border-radius: 0.5rem;
   width: 100%;
   height: 100%;

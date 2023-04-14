@@ -4,6 +4,8 @@ import { useFetch } from '@vueuse/core'
 import ImgurClient from 'imgur'
 
 export const useMediaStore = defineStore('mediaStore', () => {
+  const runtimeConfig = useRuntimeConfig()
+  const { apiBaseUrl: API_BASE_URL } = runtimeConfig
   const images = reactive([])
 
   const client = new ImgurClient({
@@ -12,14 +14,12 @@ export const useMediaStore = defineStore('mediaStore', () => {
     refreshToken: '4024a39b10347625f761505d9f1ca29395f80637'
   })
 
+  // 刪除圖片
   const deleteImage = async (hash) => {
-    // 刪除圖片
-    const { data } = await useFetch(
-      `https://api.baiyan777.com/api/image/${hash}`
-    )
+    const { data } = await useFetch(`${API_BASE_URL}/api/image/${hash}`)
       .delete()
       .json()
-    console.log(data.value, 'deleteImage')
+
     // 更新 images 內容
     images.splice(
       images.findIndex((obj) => obj.deletehash == hash),
@@ -27,17 +27,17 @@ export const useMediaStore = defineStore('mediaStore', () => {
     )
   }
 
+  // 上傳圖片
   const uploadImage = async (event) => {
     const formData = new FormData()
     formData.append('files', event.target.files[0])
     formData.append('name', event.target.files[0].name)
-    const { data } = await useFetch('https://api.baiyan777.com/api/image/')
+
+    const { data } = await useFetch(`${API_BASE_URL}/api/image/`)
       .post(formData, null)
       .json()
-    console.log(data.value, data.value.data, 'uploadImage')
+
     images.push(...data.value.data)
-    // http://localhost:3000/api/image/
-    // https://api.baiyan777.com/api/image
   }
 
   const getImages = async () => {

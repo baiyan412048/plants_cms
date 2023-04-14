@@ -10,37 +10,38 @@ const props = defineProps({
 
 const emit = defineEmits(['onUpdateStyle', 'onUpdateContent', 'onUpdateImages'])
 
-const style = computed(() => props.paragraph.style)
-const content = computed(() => props.paragraph.content)
-const images = computed(() => props.paragraph.images)
+const style = computed(() => props.paragraph?.style)
+const content = computed(() => props.paragraph?.content)
+const images = computed(() => props.paragraph?.images)
 
+// 確定選擇圖片
+const updateImage = (modalImages) => {
+  emit('onUpdateImages', props.paragraph.id, modalImages)
+  toggleModal()
+}
+
+// 取消選擇圖片
+const cancelSelectImage = (modalImages) => {
+  modalImages.forEach((obj) => {
+    obj.selected = false
+    if (images.value.includes(obj.link)) {
+      obj.selected = true
+    }
+  })
+
+  toggleModal()
+}
+
+// 燈箱開關狀態
 const modalState = ref(false)
+// 開關 modal
 const toggleModal = () => {
-  console.log(modalState.value)
   if (modalState.value) {
     document.body.classList.remove('overflow-hidden')
   } else {
     document.body.classList.add('overflow-hidden')
   }
   modalState.value = !modalState.value
-}
-
-// 選擇圖片
-const selectImage = (event, src) => {
-  if (images.value.length >= 4) return
-  if (!event.target.classList.contains('active')) {
-    // 選取圖片
-    emit('onUpdateImages', props.paragraph.id, src, true)
-    event.target.classList.add('active')
-  } else {
-    // 取消選取
-    emit('onUpdateImages', props.paragraph.id, src)
-    event.target.classList.remove('active')
-    // paragraphModel.images.splice(
-    //   paragraphModel.images.findIndex((obj) => obj.id == id),
-    //   1
-    // )
-  }
 }
 </script>
 
@@ -113,7 +114,10 @@ const selectImage = (event, src) => {
     </div>
     <ModalSelectImage
       v-show="modalState"
-      @select-image="selectImage"
+      :selected-image="images"
+      :limit="4"
+      @update-image="updateImage"
+      @cancel-select-image="cancelSelectImage"
       @toggle-modal="toggleModal"
     />
   </div>

@@ -38,7 +38,7 @@ onMounted(() => {
             <PhotoIcon
               class="h-5 w-5 text-gray-400 group-hover:text-gray-900"
             />
-            <span class="ml-3 flex-1 whitespace-nowrap text-left">Media</span>
+            <span class="ml-3 flex-1 whitespace-nowrap text-left">相簿</span>
           </NuxtLink>
         </li>
         <li>
@@ -51,24 +51,26 @@ onMounted(() => {
             <WindowIcon
               class="h-5 w-5 text-gray-400 group-hover:text-gray-900"
             />
-            <span class="ml-3 flex-1 whitespace-nowrap text-left">Unit</span>
+            <span class="ml-3 flex-1 whitespace-nowrap text-left"
+              >文章專欄</span
+            >
             <ChevronDownIcon class="h-4 w-4" />
           </button>
           <ul id="dropdown-pages" class="hidden space-y-2 py-2">
             <li>
               <NuxtLink
-                to="/"
+                to="/article"
                 class="group flex w-full items-center rounded-lg p-2 pl-11 text-base font-normal text-gray-900 transition duration-75 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
               >
-                Home
+                單元設定
               </NuxtLink>
             </li>
             <li>
               <NuxtLink
-                to="/article"
+                to="/article/list"
                 class="group flex w-full items-center rounded-lg p-2 pl-11 text-base font-normal text-gray-900 transition duration-75 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
               >
-                Article
+                文章列表
               </NuxtLink>
             </li>
           </ul>

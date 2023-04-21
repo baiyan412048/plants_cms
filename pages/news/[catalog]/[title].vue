@@ -1,7 +1,7 @@
 <script setup>
 import { CheckIcon, TrashIcon } from '@heroicons/vue/24/solid'
 
-import { useArticleCatalogs, useArticleDetail } from '@/stores/article'
+import { useNewsCatalogs, useNewsDetail } from '@/stores/news'
 import { useMedia } from '@/stores/media'
 
 const route = useRoute()
@@ -13,31 +13,30 @@ const mediaStore = useMedia()
 const { getMediaImages } = mediaStore
 const mediaImagesTemp = await getMediaImages()
 
-// 文章分類 store
-const articleCatalogsStore = useArticleCatalogs()
-// 文章分類 method
-const { getArticleCatalogs } = articleCatalogsStore
-// 文章分類
-const { data: catalogs } = await getArticleCatalogs()
-const articleCatalogs = computed(() => catalogs.value.data)
+// 最新消息分類 store
+const newsCatalogsStore = useNewsCatalogs()
+// 最新消息分類 method
+const { getNewsCatalogs } = newsCatalogsStore
+// 最新消息分類
+const { data: catalogs } = await getNewsCatalogs()
+const newsCatalogs = computed(() => catalogs.value.data)
 
-// 文章 detail 建立 store
-const articleDetailStore = useArticleDetail()
-// 文章 detail 建立 method
-const { getArticleDetail, putArticleDetail, deleteArticleDetail } =
-  articleDetailStore
-// 文章 detail
-const { data: detail } = await getArticleDetail(catalog, title)
-const articleDetail = computed(() => detail.value.data)
+// 最新消息 detail 建立 store
+const newsDetailStore = useNewsDetail()
+// 最新消息 detail 建立 method
+const { getNewsDetail, putNewsDetail, deleteNewsDetail } = newsDetailStore
+// 最新消息 detail
+const { data: detail } = await getNewsDetail(catalog, title)
+const newsDetail = computed(() => detail.value.data)
 
-// 文章 id
-const $id = ref(articleDetail.value._id)
+// 最新消息 id
+const $id = ref(newsDetail.value._id)
 
-// 文章 outline 儲存
+// 最新消息 outline 儲存
 const outlineStore = reactive({
-  title: articleDetail.value.outline.title,
-  image: articleDetail.value.outline.image,
-  catalog: articleDetail.value.outline.catalog.catalog
+  title: newsDetail.value.outline.title,
+  image: newsDetail.value.outline.image,
+  catalog: newsDetail.value.outline.catalog.catalog
 })
 
 // 更新 outline title 設定
@@ -105,7 +104,7 @@ const toggleOutlineModal = () => {
 
 // 段落儲存
 const paragraphStore = reactive([
-  ...articleDetail.value.contents.map((obj, id) => {
+  ...newsDetail.value.contents.map((obj, id) => {
     return {
       id,
       style: obj.style,
@@ -132,9 +131,9 @@ const updateParagraphImages = (id, modalImages) => {
   store.splice(0, store.length, ...targets)
 }
 
-// 刪除文章
+// 刪除最新消息
 const deleteDetail = async () => {
-  await deleteArticleDetail($id, catalog, title)
+  await deleteNewsDetail($id, catalog, title)
 }
 
 // 送出表單 (修改)
@@ -150,7 +149,7 @@ const submitForm = async () => {
     obj.images = toRaw(obj.images)
   })
 
-  await putArticleDetail(catalog, title, postData)
+  await putNewsDetail(catalog, title, postData)
 }
 </script>
 
@@ -159,11 +158,11 @@ const submitForm = async () => {
     <form @submit.prevent="submitForm($event)">
       <div class="mb-4">
         <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">
-          編輯文章
+          編輯最新消息
         </h2>
         <div class="flex justify-between">
           <h1 class="text-l font-bold text-gray-900 dark:text-white">
-            {{ articleDetail?.outline?.title }}
+            {{ newsDetail?.outline?.title }}
           </h1>
           <div class="grid grid-cols-2 gap-4">
             <button
@@ -172,26 +171,26 @@ const submitForm = async () => {
               @click.prevent="deleteDetail"
             >
               <TrashIcon class="mr-2 h-4 w-4" />
-              刪除文章
+              刪除最新消息
             </button>
             <button
               type="submit"
               class="flex items-center justify-center rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
             >
               <CheckIcon class="mr-2 h-4 w-4" />
-              修改文章
+              修改最新消息
             </button>
           </div>
         </div>
       </div>
-      <ArticleOutline
+      <NewsOutline
         :outline="outlineStore"
-        :catalogs="articleCatalogs"
+        :catalogs="newsCatalogs"
         @update-title="updateOutlineTitle"
         @update-catalog="updateOutlineCatalog"
         @toggle-modal="toggleOutlineModal"
       />
-      <ArticleParagraph
+      <NewsParagraph
         v-for="(item, key) in paragraphStore"
         :key="key"
         :paragraph="item"

@@ -6,27 +6,29 @@ import {
 } from '@heroicons/vue/24/solid'
 
 import { initFlowbite } from 'flowbite'
-import { useArticleCatalogs, useArticleOutlines } from '@/stores/article'
+import { useNewsCatalogs, useNewsOutlines } from '@/stores/news'
 
-// 文章分類 store
-const articleCatalogsStore = useArticleCatalogs()
-// 文章分類 method
-const { getArticleCatalogs } = articleCatalogsStore
-// 文章分類
-const { data: catalog } = await getArticleCatalogs()
-const articleCatalogs = computed(() => catalog.value.data)
+// 最新消息分類 store
+const newsCatalogsStore = useNewsCatalogs()
+// 最新消息分類 method
+const { getNewsCatalogs } = newsCatalogsStore
+// 最新消息分類
+const { data: catalog } = await getNewsCatalogs()
+// 若沒設定則預設為空陣列
+const newsCatalogs = computed(() => catalog.value?.data ?? [])
 
-// 文章 outline store
-const articleOutlineStore = useArticleOutlines()
-// 文章 outline method
-const { getArticleOutlines } = articleOutlineStore
-// 文章 outline
-const { data: outlines } = await getArticleOutlines()
-const articleOutlines = computed(() => outlines.value.data)
+// 最新消息 outline store
+const newsOutlineStore = useNewsOutlines()
+// 最新消息 outline method
+const { getNewsOutlines } = newsOutlineStore
+// 最新消息 outline
+const { data: outlines } = await getNewsOutlines()
+// 若沒設定則預設為空陣列
+const newsOutlines = computed(() => outlines.value?.data ?? [])
 
 // 篩選分類
 const filterCatalog = reactive([
-  ...articleCatalogs.value.map((obj) => obj.catalog)
+  ...newsCatalogs.value.map((obj) => obj.catalog)
 ])
 // 切換篩選分類
 const changeFilter = (target) => {
@@ -77,11 +79,11 @@ onMounted(() => {
         >
           <div class="flex w-full items-center space-x-3 md:w-auto">
             <NuxtLink
-              to="/article/create"
+              to="/news/create"
               class="flex items-center justify-center rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
             >
               <PlusIcon class="mr-2 h-4 w-4" />
-              新增文章
+              新增最新消息
             </NuxtLink>
             <button
               id="actionsDropdownButton"
@@ -164,7 +166,7 @@ onMounted(() => {
             >
               <ul class="space-y-2 text-sm" aria-labelledby="dropdownDefault">
                 <li
-                  v-for="(item, key) in articleCatalogs"
+                  v-for="(item, key) in newsCatalogs"
                   :key="key"
                   class="flex items-center"
                 >
@@ -214,7 +216,7 @@ onMounted(() => {
       </template>
       <template #tbody>
         <tbody>
-          <template v-for="(tr, key) in articleOutlines" :key="key">
+          <template v-for="(tr, key) in newsOutlines" :key="key">
             <tr
               v-if="filterCatalog.includes(tr.catalog.catalog)"
               class="border-b dark:border-gray-600"
@@ -252,7 +254,7 @@ onMounted(() => {
                 class="whitespace-nowrap px-4 py-2 font-bold text-gray-900 dark:text-white"
               >
                 <NuxtLink
-                  :to="`/article/${tr.catalog.catalog}/${tr.title}`"
+                  :to="`/news/${tr.catalog.catalog}/${tr.title}`"
                   class="font-medium text-primary-600 hover:underline dark:text-primary-500"
                 >
                   編輯

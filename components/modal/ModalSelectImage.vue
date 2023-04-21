@@ -1,9 +1,9 @@
 <script setup>
 import { PlusIcon, CheckCircleIcon } from '@heroicons/vue/24/solid'
-import { useMediaStore } from '@/stores/media'
+import { useMedia } from '@/stores/media'
 
 const props = defineProps({
-  selectedImage: {
+  images: {
     type: Array,
     default() {
       return []
@@ -17,40 +17,55 @@ const props = defineProps({
   }
 })
 
-const { selectedImage, limit } = toRefs(props)
-
-const emit = defineEmits(['updateImage', 'cancelSelectImage', 'toggleModal'])
+const emit = defineEmits([
+  'updateImage',
+  'selectImage',
+  'cancelSelectImage',
+  'toggleModal'
+])
 
 // media store
-const mediaStore = useMediaStore()
-// 取得所有圖片
-await mediaStore.getImages()
+const mediaStore = useMedia()
+// media method
+const { uploadMediaImage } = mediaStore
 
-const modalImages = reactive([])
+// 已選取圖片
+const selectedImages = computed(() =>
+  props.images.filter((obj) => obj.selected)
+)
 
-const toggleSelectImage = (id) => {
-  const $select = modalImages.find((obj) => obj.id == id)
-  $select.selected = !$select.selected
-  // 最大選取數量
-  if (modalImages.filter((obj) => obj.selected).length > limit) {
-    $select.selected = !$select.selected
-  }
+// 圖片渲染 computed
+const modalImages = computed(() => props.images)
+
+// 已選擇圖片暫存 ( 上一步 )
+const selectTemp = reactive([])
+
+const onUpdateImage = () => {
+  selectTemp.splice(
+    0,
+    selectTemp.length,
+    ...selectedImages.value.map((obj) => obj.id)
+  )
+  emit('updateImage', selectTemp)
 }
 
-onMounted(async () => {
-  modalImages.splice(0, modalImages.length)
-  modalImages.splice(
-    0,
-    modalImages.length,
-    ...mediaStore.images.map((obj) => {
-      obj.selected = false
-      if (selectedImage.value.includes(obj.link)) {
-        obj.selected = true
-      }
-      return obj
-    })
-  )
-})
+const onSelectImage = (id) => {
+  emit('selectImage', id, props.limit)
+}
+
+const onCancelSelectImage = () => {
+  emit('cancelSelectImage', selectTemp)
+}
+
+// 更新圖片
+// const refreshImages = async () => {
+//   const temp = await getMediaImages()
+//   images.splice(0, images.length, ...temp)
+// }
+
+const onUploadImage = async (event) => {
+  await uploadMediaImage(event)
+}
 </script>
 
 <template>
@@ -98,7 +113,7 @@ onMounted(async () => {
             :key="key"
             class="modal-images relative rounded-lg bg-white shadow dark:bg-gray-800"
             :class="{ active: image.selected }"
-            @click="toggleSelectImage(image.id)"
+            @click="onSelectImage(image.id)"
           >
             <CheckCircleIcon
               v-show="image.selected"
@@ -130,14 +145,14 @@ onMounted(async () => {
             <button
               type="button"
               class="rounded-lg bg-primary-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-              @click="$emit('updateImage', modalImages)"
+              @click="onUpdateImage"
             >
               選取
             </button>
             <button
               type="button"
               class="rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:z-10 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-600"
-              @click="$emit('cancelSelectImage', modalImages)"
+              @click="onCancelSelectImage"
             >
               取消
             </button>
@@ -145,11 +160,7 @@ onMounted(async () => {
           <label
             class="flex cursor-pointer items-center justify-center rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
           >
-            <input
-              type="file"
-              class="hidden"
-              @change="mediaStore.uploadImage"
-            />
+            <input type="file" class="hidden" @change="onUploadImage" />
             <PlusIcon class="mr-2 h-4 w-4" />
             新增圖片
           </label>

@@ -14,12 +14,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits([
-  'onUpdateTitle',
-  'onUpdateCatalog',
-  'onUpdateImage',
-  'toggleModal'
-])
+const emit = defineEmits(['updateTitle', 'updateCatalog', 'toggleModal'])
 
 const title = computed(() => props.outline?.title)
 const image = computed(() => props.outline?.image)
@@ -42,7 +37,7 @@ const catalog = computed(() => props.outline?.catalog)
         class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-600 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
         placeholder="請輸入文章標題"
         required
-        @input="$emit('onUpdateTitle', $event.target.value)"
+        @input="$emit('updateTitle', $event.target.value)"
       />
     </div>
     <div class="w-full">
@@ -55,11 +50,11 @@ const catalog = computed(() => props.outline?.catalog)
         id="catalog"
         :value="catalog"
         class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
-        @change="$emit('onUpdateCatalog', $event.target.value)"
+        @change="$emit('updateCatalog', $event.target.value)"
       >
         <option selected disabled hidden>請選擇文章分類</option>
         <option
-          v-for="(option, key) in catalogs"
+          v-for="(option, key) in props.catalogs"
           :key="key"
           :value="option.catalog"
         >

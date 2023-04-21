@@ -1,12 +1,10 @@
 import { defineStore } from 'pinia'
-import { useFetch } from '@vueuse/core'
 
 import ImgurClient from 'imgur'
 
-export const useMediaStore = defineStore('mediaStore', () => {
+export const useMedia = defineStore('media', () => {
   const runtimeConfig = useRuntimeConfig()
-  const { apiBaseUrl: API_BASE_URL } = runtimeConfig
-  const images = reactive([])
+  const { apiBaseUrl: API_BASE_URL } = runtimeConfig.public
 
   const client = new ImgurClient({
     clientId: '81bcc5e89b004a1',
@@ -15,44 +13,56 @@ export const useMediaStore = defineStore('mediaStore', () => {
   })
 
   // 刪除圖片
-  const deleteImage = async (hash) => {
-    const { data } = await useFetch(`${API_BASE_URL}/api/image/${hash}`)
-      .delete()
-      .json()
+  const deleteMediaImage = async (hash) => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/image/${hash}`,
+        {
+          method: 'DELETE'
+        }
+      )
 
-    // 更新 images 內容
-    images.splice(
-      images.findIndex((obj) => obj.deletehash == hash),
-      1
-    )
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   // 上傳圖片
-  const uploadImage = async (event) => {
+  const uploadMediaImage = async (event) => {
     const formData = new FormData()
     formData.append('files', event.target.files[0])
     formData.append('name', event.target.files[0].name)
 
-    const { data } = await useFetch(`${API_BASE_URL}/api/image/`)
-      .post(formData, null)
-      .json()
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/image/`,
+        {
+          method: 'POST',
+          body: formData
+        }
+      )
 
-    images.push(...data.value.data)
+      // return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
   }
 
-  const getImages = async () => {
+  // 取得所有圖片
+  const getMediaImages = async () => {
     try {
       const { data } = await client.getAlbum('a15Lk0o')
-      images.splice(0, images.length, ...data.images)
+
+      return data.images
     } catch (error) {
       console.error(error)
     }
   }
 
   return {
-    images,
-    getImages,
-    deleteImage,
-    uploadImage
+    getMediaImages,
+    deleteMediaImage,
+    uploadMediaImage
   }
 })

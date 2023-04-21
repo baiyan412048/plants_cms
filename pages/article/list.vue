@@ -6,34 +6,30 @@ import {
 } from '@heroicons/vue/24/solid'
 
 import { initFlowbite } from 'flowbite'
-import { storeToRefs } from 'pinia'
-import { useArticleGetCatalogs, useArticleGetOutlines } from '@/stores/article'
+import { useArticleCatalogs, useArticleOutlines } from '@/stores/article'
 
 // 文章分類 store
-const articleCatalogsStore = useArticleGetCatalogs()
-// 文章分類
-const { articleCatalogs } = storeToRefs(articleCatalogsStore)
-// 取得文章分類
+const articleCatalogsStore = useArticleCatalogs()
+// 文章分類 method
 const { getArticleCatalogs } = articleCatalogsStore
+// 文章分類
+const { data: catalog } = await getArticleCatalogs()
+const articleCatalogs = computed(() => catalog.value.data)
 
 // 文章 outline store
-const articleOutlineStore = useArticleGetOutlines()
-// 文章 outline
-const { articleOutlines } = storeToRefs(articleOutlineStore)
-// 取得文章 outline
+const articleOutlineStore = useArticleOutlines()
+// 文章 outline method
 const { getArticleOutlines } = articleOutlineStore
+// 文章 outline
+const { data: outlines } = await getArticleOutlines()
+const articleOutlines = computed(() => outlines.value.data)
 
-const filterCatalog = reactive([])
-
+// 篩選分類
+const filterCatalog = reactive([
+  ...articleCatalogs.value.map((obj) => obj.catalog)
+])
+// 切換篩選分類
 const changeFilter = (target) => {
-  console.log(target, 'target')
-  console.log(target.checked, 'checked')
-  console.log(target.value, 'value')
-  console.log(
-    filterCatalog.findIndex((value) => value == target.value),
-    'index'
-  )
-
   if (target.checked) {
     filterCatalog.push(target.value)
   } else {
@@ -44,17 +40,8 @@ const changeFilter = (target) => {
   }
 }
 
-onMounted(async () => {
-  await getArticleCatalogs()
-  await getArticleOutlines()
-
+onMounted(() => {
   initFlowbite()
-
-  filterCatalog.splice(
-    0,
-    filterCatalog.length,
-    ...articleCatalogs.value.map((obj) => obj.catalog)
-  )
 })
 </script>
 

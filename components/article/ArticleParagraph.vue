@@ -1,4 +1,6 @@
 <script setup>
+import { useMedia } from '@/stores/media'
+
 const props = defineProps({
   paragraph: {
     type: Object,
@@ -8,40 +10,69 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['onUpdateStyle', 'onUpdateContent', 'onUpdateImages'])
+const emit = defineEmits(['updateStyle', 'updateContent', 'updateImages'])
+
+// media store
+const mediaStore = useMedia()
+// media method
+const { getMediaImages } = mediaStore
+const mediaImagesTemp = await getMediaImages()
 
 const style = computed(() => props.paragraph?.style)
 const content = computed(() => props.paragraph?.content)
 const images = computed(() => props.paragraph?.images)
 
-// 確定選擇圖片
-const updateImage = (modalImages) => {
-  emit('onUpdateImages', props.paragraph.id, modalImages)
-  toggleModal()
-}
-
-// 取消選擇圖片
-const cancelSelectImage = (modalImages) => {
-  modalImages.forEach((obj) => {
+// paragraph 已選取圖片
+const selectedParagraphImage = reactive([
+  // 深拷貝原陣列
+  ...JSON.parse(JSON.stringify(mediaImagesTemp)).map((obj) => {
     obj.selected = false
     if (images.value.includes(obj.link)) {
       obj.selected = true
     }
+    return obj
+  })
+])
+// 更新 paragraph 圖片
+const updateParagraphImage = () => {
+  emit('updateImages', props.paragraph.id, selectedParagraphImage)
+
+  // 關閉選擇圖片燈箱
+  toggleParagraphModal()
+}
+// 選擇 paragraph 圖片
+const selectParagraphImage = (id, limit) => {
+  const target = selectedParagraphImage.find((obj) => obj.id === id)
+  if (target) {
+    target.selected = !target.selected
+  }
+  // 最大選取數量
+  if (selectedParagraphImage.filter((obj) => obj.selected).length > limit) {
+    target.selected = !target.selected
+  }
+}
+// 取消選擇 paragraph 圖片
+const cancelSelectParagraphImage = (temp) => {
+  selectedParagraphImage.forEach((obj) => {
+    obj.selected = false
+    if (temp.includes(obj.id)) {
+      obj.selected = true
+    }
   })
 
-  toggleModal()
+  // 關閉選擇圖片燈箱
+  toggleParagraphModal()
 }
-
 // 燈箱開關狀態
-const modalState = ref(false)
+const paragraphModalState = ref(false)
 // 開關 modal
-const toggleModal = () => {
-  if (modalState.value) {
+const toggleParagraphModal = () => {
+  if (paragraphModalState.value) {
     document.body.classList.remove('overflow-hidden')
   } else {
     document.body.classList.add('overflow-hidden')
   }
-  modalState.value = !modalState.value
+  paragraphModalState.value = !paragraphModalState.value
 }
 </script>
 
@@ -57,9 +88,7 @@ const toggleModal = () => {
         id="category"
         :value="style"
         class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
-        @change="
-          $emit('onUpdateStyle', props.paragraph.id, $event.target.value)
-        "
+        @change="$emit('updateStyle', props.paragraph.id, $event.target.value)"
       >
         <option value="single">single</option>
         <option value="double">double</option>
@@ -74,7 +103,7 @@ const toggleModal = () => {
       <button
         class="block rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
         type="button"
-        @click="toggleModal"
+        @click="toggleParagraphModal"
       >
         請選擇圖片
       </button>
@@ -107,18 +136,17 @@ const toggleModal = () => {
         rows="8"
         class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
         placeholder="Your description here"
-        @input="
-          $emit('onUpdateContent', props.paragraph.id, $event.target.value)
-        "
+        @input="$emit('updateContent', props.paragraph.id, $event.target.value)"
       ></textarea>
     </div>
     <ModalSelectImage
-      v-show="modalState"
-      :selected-image="images"
+      v-show="paragraphModalState"
+      :images="selectedParagraphImage"
       :limit="4"
-      @update-image="updateImage"
-      @cancel-select-image="cancelSelectImage"
-      @toggle-modal="toggleModal"
+      @update-image="updateParagraphImage"
+      @select-image="selectParagraphImage"
+      @cancel-select-image="cancelSelectParagraphImage"
+      @toggle-modal="toggleParagraphModal"
     />
   </div>
 </template>

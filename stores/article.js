@@ -1,124 +1,238 @@
 import { defineStore } from 'pinia'
-import { useFetch } from '@vueuse/core'
 
-// 取得文章分類
-export const useArticleGetCatalogs = defineStore(
-  'articleGetCatalogs',
-  () => {
-    const runtimeConfig = useRuntimeConfig()
-    const { apiBaseUrl: API_BASE_URL } = runtimeConfig
-
-    const articleCatalogs = reactive([])
-
-    const getArticleCatalogs = async () => {
-      try {
-        const { data } = await useFetch(
-          `${API_BASE_URL}/api/article/catalogs`
-        ).json()
-
-        articleCatalogs.splice(0, articleCatalogs.length, ...data.value.data)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    return {
-      articleCatalogs,
-      getArticleCatalogs
-    }
-  },
-  {
-    persist: true
-  }
-)
-
-// 取得文章 outlines
-export const useArticleGetOutlines = defineStore('articleGetOutlines', () => {
+// 單元設定
+export const useArticleSetting = defineStore('articleSetting', () => {
   const runtimeConfig = useRuntimeConfig()
-  const { apiBaseUrl: API_BASE_URL } = runtimeConfig
+  const { apiBaseUrl: API_BASE_URL } = runtimeConfig.public
 
-  const articleOutlines = reactive([])
-
-  const getArticleOutlines = async () => {
+  // 取得單元設定
+  const getArticleSetting = async () => {
     try {
-      const { data } = await useFetch(`${API_BASE_URL}/api/article`).json()
-      articleOutlines.splice(0, articleOutlines.length, ...data.value.data)
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/article/setting`,
+        {
+          pick: ['data']
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // 修改單元設定
+  const putArticleSetting = async (postData) => {
+    try {
+      await useFetch(`${API_BASE_URL}/api/article/setting`, {
+        method: 'POST',
+        body: postData,
+        pick: ['data']
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  return { getArticleSetting, putArticleSetting }
+})
+
+// 文章分類
+export const useArticleCatalogs = defineStore('articleCatalogs', () => {
+  const runtimeConfig = useRuntimeConfig()
+  const { apiBaseUrl: API_BASE_URL } = runtimeConfig.public
+
+  // 取得文章分類
+  const getArticleCatalogs = async () => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/article/catalogs`,
+        {
+          pick: ['data']
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // 新增文章分類
+  const postArticleCatalogs = async ({ catalog }) => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/article/catalog`,
+        {
+          method: 'POST',
+          body: {
+            catalog
+          },
+          pick: ['data']
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // 刪除文章分類
+  const deleteArticleCatalogs = async ({ catalog, _id }) => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/article/catalog/${catalog}`,
+        {
+          method: 'DELETE',
+          body: {
+            _id
+          }
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // 修改文章分類
+  const putArticleCatalogs = async (catalogs, { catalog, _id }) => {
+    // 是否為新的分類名稱
+    if (
+      catalogs.value.some((obj) => obj._id == _id && obj.catalog == catalog)
+    ) {
+      return
+    }
+
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/article/catalog/${catalog}`,
+        {
+          method: 'PUT',
+          body: {
+            _id
+          }
+        }
+      )
+
+      return { data, pending, error, refresh }
     } catch (error) {
       console.error(error)
     }
   }
 
   return {
-    articleOutlines,
+    getArticleCatalogs,
+    postArticleCatalogs,
+    deleteArticleCatalogs,
+    putArticleCatalogs
+  }
+})
+
+// 文章 outlines
+export const useArticleOutlines = defineStore('articleOutlines', () => {
+  const runtimeConfig = useRuntimeConfig()
+  const { apiBaseUrl: API_BASE_URL } = runtimeConfig.public
+
+  const getArticleOutlines = async () => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/article`,
+        {
+          pick: ['data']
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  return {
     getArticleOutlines
   }
 })
 
-// 新增文章
-export const useArticlePostDetail = defineStore('articlePostDetail', () => {
+// 文章 Detail
+export const useArticleDetail = defineStore('articleDetail', () => {
   const runtimeConfig = useRuntimeConfig()
-  const { apiBaseUrl: API_BASE_URL } = runtimeConfig
-
-  const postArticleDetail = async (postData) => {
-    try {
-      await useFetch(`${API_BASE_URL}/api/article/detail`)
-        .post(postData, null)
-        .json()
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  return {
-    postArticleDetail
-  }
-})
-
-// 取得特定文章
-export const useArticleGetDetail = defineStore('useArticleGetDetail', () => {
-  const runtimeConfig = useRuntimeConfig()
-  const { apiBaseUrl: API_BASE_URL } = runtimeConfig
-
-  const articleDetail = reactive({})
+  const { apiBaseUrl: API_BASE_URL } = runtimeConfig.public
 
   const getArticleDetail = async (catalog, title) => {
     try {
-      const { data } = await useFetch(
-        `${API_BASE_URL}/api/article/${catalog}/${title}`
-      ).json()
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/article/${catalog}/${title}`,
+        {
+          pick: ['data']
+        }
+      )
 
-      Object.keys(articleDetail).forEach((key) => delete articleDetail[key])
-      Object.assign(articleDetail, data.value.data)
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const postArticleDetail = async (postData) => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/article/detail`,
+        {
+          method: 'POST',
+          body: postData,
+          pick: ['data']
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const putArticleDetail = async (catalog, title, postData) => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/article/${catalog}/${title}`,
+        {
+          method: 'PUT',
+          body: postData,
+          pick: ['data']
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const deleteArticleDetail = async (id, catalog, title) => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/article/${catalog}/${title}`,
+        {
+          method: 'DELETE',
+          body: {
+            id
+          },
+          pick: ['data']
+        }
+      )
+
+      return { data, pending, error, refresh }
     } catch (error) {
       console.error(error)
     }
   }
 
   return {
-    articleDetail,
-    getArticleDetail
+    getArticleDetail,
+    postArticleDetail,
+    putArticleDetail,
+    deleteArticleDetail
   }
 })
-
-// 更新特定文章
-export const useArticleUpdateDetail = defineStore(
-  'useArticleUpdateDetail',
-  () => {
-    const runtimeConfig = useRuntimeConfig()
-    const { apiBaseUrl: API_BASE_URL } = runtimeConfig
-
-    const updateArticleDetail = async (catalog, title, postData) => {
-      try {
-        await useFetch(`${API_BASE_URL}/api/article/${catalog}/${title}`)
-          .post(postData, null)
-          .json()
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    return {
-      updateArticleDetail
-    }
-  }
-)

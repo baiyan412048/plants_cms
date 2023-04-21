@@ -29,10 +29,12 @@ const {
 const { data: res, refresh: catalogRefresh } = await getArticleCatalogs()
 
 // 文章單元標題
-const title = ref(setting.value.data[0].name)
+// 若沒設定則預設為空字串
+const title = ref(setting.value?.data[0].name ?? '')
 
 // 文章分類
-const catalogs = computed(() => res.value.data)
+// 若沒設定則預設為空陣列
+const catalogs = computed(() => res.value?.data ?? [])
 // 待操作分類儲存
 const catalogTemp = reactive({
   catalog: '',
@@ -66,9 +68,10 @@ const putCatalog = async () => {
 }
 
 // banner 儲存
+// 若沒設定則預設為空字串
 const banner = reactive({
-  desktop: setting.value.data[0].banner.desktop,
-  mobile: setting.value.data[0].banner?.mobile
+  desktop: setting.value?.data[0]?.banner?.desktop ?? '',
+  mobile: setting.value?.data[0]?.banner?.mobile ?? ''
 })
 
 // desktop banner 已選取圖片

@@ -14,7 +14,8 @@ const articleCatalogsStore = useArticleCatalogs()
 const { getArticleCatalogs } = articleCatalogsStore
 // 文章分類
 const { data: catalog } = await getArticleCatalogs()
-const articleCatalogs = computed(() => catalog.value.data)
+// 若沒設定則預設為空陣列
+const articleCatalogs = computed(() => catalog.value?.data ?? [])
 
 // 文章 outline store
 const articleOutlineStore = useArticleOutlines()
@@ -22,7 +23,8 @@ const articleOutlineStore = useArticleOutlines()
 const { getArticleOutlines } = articleOutlineStore
 // 文章 outline
 const { data: outlines } = await getArticleOutlines()
-const articleOutlines = computed(() => outlines.value.data)
+// 若沒設定則預設為空陣列
+const articleOutlines = computed(() => outlines.value?.data ?? [])
 
 // 篩選分類
 const filterCatalog = reactive([

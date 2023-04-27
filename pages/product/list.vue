@@ -7,29 +7,29 @@ import {
 
 import { initFlowbite } from 'flowbite'
 import { useTimeAgo } from '@vueuse/core'
-import { useProductCatalogs, useProductOutlines } from '@/stores/product'
+import { useProductCatalog, useProductOutline } from '@/stores/product'
 
 // 產品分類 store
-const productCatalogsStore = useProductCatalogs()
+const productCatalogStore = useProductCatalog()
 // 產品分類 method
-const { getProductCatalogs } = productCatalogsStore
+const { getProductCatalog } = productCatalogStore
 // 產品分類
-const { data: catalog } = await getProductCatalogs()
+const { data: catalog } = await getProductCatalog()
 // 若沒設定則預設為空陣列
-const productCatalogs = computed(() => catalog.value?.data ?? [])
+const productCatalog = computed(() => catalog.value?.data ?? [])
 
 // 產品 outline store
-const productOutlineStore = useProductOutlines()
+const productOutlineStore = useProductOutline()
 // 產品 outline method
-const { getProductOutlines } = productOutlineStore
+const { getProductOutline } = productOutlineStore
 // 產品 outline
-const { data: outlines } = await getProductOutlines()
+const { data: outline } = await getProductOutline()
 // 若沒設定則預設為空陣列
-const productOutlines = computed(() => outlines.value?.data ?? [])
+const productOutline = computed(() => outline.value?.data ?? [])
 
 // 篩選分類
 const filterCatalog = reactive([
-  ...productCatalogs.value.map((obj) => obj.catalog)
+  ...productCatalog.value.map((obj) => obj.catalog)
 ])
 // 切換篩選分類
 const changeFilter = (target) => {
@@ -160,7 +160,7 @@ onMounted(() => {
             >
               <ul class="space-y-2 text-sm" aria-labelledby="dropdownDefault">
                 <li
-                  v-for="(item, key) in productCatalogs"
+                  v-for="(item, key) in productCatalog"
                   :key="key"
                   class="flex items-center"
                 >
@@ -212,7 +212,7 @@ onMounted(() => {
       </template>
       <template #tbody>
         <tbody>
-          <template v-for="(tr, key) in productOutlines" :key="key">
+          <template v-for="(tr, key) in productOutline" :key="key">
             <tr
               v-if="filterCatalog.includes(tr.catalog.catalog)"
               class="border-b dark:border-gray-600"

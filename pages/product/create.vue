@@ -1,7 +1,13 @@
 <script setup>
 import { CheckIcon, PlusIcon } from '@heroicons/vue/24/solid'
 
-import { useProductCatalogs, useProductDetail } from '@/stores/product'
+import {
+  useProductCatalog,
+  useProductSize,
+  useProductDiff,
+  useProductEnv,
+  useProductDetail
+} from '@/stores/product'
 import { useMedia } from '@/stores/media'
 
 // media store
@@ -11,12 +17,39 @@ const { getMediaImages } = mediaStore
 const mediaImagesTemp = await getMediaImages()
 
 // 產品分類 store
-const productCatalogsStore = useProductCatalogs()
+const productCatalogStore = useProductCatalog()
 // 產品分類 method
-const { getProductCatalogs } = productCatalogsStore
+const { getProductCatalog } = productCatalogStore
 // 產品分類
-const { data: catalog } = await getProductCatalogs()
-const productCatalogs = computed(() => catalog.value?.data ?? [])
+const { data: catalog } = await getProductCatalog()
+const productCatalog = computed(() => catalog.value?.data ?? [])
+
+// 產品尺寸 store
+const productSizeStore = useProductSize()
+// 產品尺寸 method
+const { getProductSize, postProductSize, deleteProductSize, putProductSize } =
+  productSizeStore
+// 取得產品尺寸
+const { data: size, refresh: sizeRefresh } = await getProductSize()
+const productSize = computed(() => size.value?.data ?? [])
+
+// 產品難易度 store
+const productDiffStore = useProductDiff()
+// 產品難易度 method
+const { getProductDiff, postProductDiff, deleteProductDiff, putProductDiff } =
+  productDiffStore
+// 取得產品難易度
+const { data: diff, refresh: diffRefresh } = await getProductDiff()
+const productDiff = computed(() => diff.value?.data ?? [])
+
+// 產品難易度 store
+const productEnvStore = useProductEnv()
+// 產品難易度 method
+const { getProductEnv, postProductEnv, deleteProductEnv, putProductEnv } =
+  productEnvStore
+// 取得產品難易度
+const { data: env, refresh: envRefresh } = await getProductEnv()
+const productEnv = computed(() => env.value?.data ?? [])
 
 // 產品建立 store
 const productDetailStore = useProductDetail()
@@ -329,7 +362,7 @@ const submitForm = async () => {
       <pre>{{ plantsDetailSetting }}</pre>
       <ProductOutline
         :outline="outlineStore"
-        :catalogs="productCatalogs"
+        :catalogs="productCatalog"
         @update-title="updateOutlineTitle"
         @update-catalog="updateOutlineCatalog"
         @update-type="updateOutlineType"
@@ -388,11 +421,13 @@ const submitForm = async () => {
             required
           >
             <option value="" selected disabled hidden>請選擇產品尺寸</option>
-            <option value="s">S ( 15 cm 以下 )</option>
-            <option value="m">M ( 15 - 59 cm )</option>
-            <option value="l">L ( 60 - 149 cm )</option>
-            <option value="xl">XL ( 150 - 199 cm )</option>
-            <option value="xxl">XXL ( 200 cm 以上 )</option>
+            <option
+              v-for="(option, key) in productSize"
+              :key="key"
+              :value="option.size"
+            >
+              {{ option.size }}
+            </option>
           </select>
         </div>
         <div v-if="outlineStore.type == 'plants'" class="w-full">
@@ -409,10 +444,13 @@ const submitForm = async () => {
             required
           >
             <option value="" selected disabled hidden>請選擇種植難易度</option>
-            <option value="初學者">初學者</option>
-            <option value="簡單">簡單</option>
-            <option value="中等">中等</option>
-            <option value="困難">困難</option>
+            <option
+              v-for="(option, key) in productDiff"
+              :key="key"
+              :value="option.diff"
+            >
+              {{ option.diff }}
+            </option>
           </select>
         </div>
         <div v-if="outlineStore.type == 'plants'" class="w-full">
@@ -429,9 +467,13 @@ const submitForm = async () => {
             required
           >
             <option value="" selected disabled hidden>請選擇適合環境</option>
-            <option value="室內">室內</option>
-            <option value="室外">室外</option>
-            <option value="不限">不限</option>
+            <option
+              v-for="(option, key) in productEnv"
+              :key="key"
+              :value="option.env"
+            >
+              {{ option.env }}
+            </option>
           </select>
         </div>
       </div>

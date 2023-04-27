@@ -244,12 +244,12 @@ onMounted(() => {
               <td
                 class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"
               >
-                $3,400
+                {{ tr.price }}
               </td>
               <td
                 class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"
               >
-                0
+                {{ tr.stock }}
               </td>
               <td
                 class="whitespace-nowrap px-4 py-2 text-sm font-medium text-gray-900 dark:text-white"

@@ -6,6 +6,7 @@ import {
 } from '@heroicons/vue/24/solid'
 
 import { initFlowbite } from 'flowbite'
+import { useTimeAgo } from '@vueuse/core'
 import { useArticleCatalogs, useArticleOutlines } from '@/stores/article'
 
 // 文章分類 store
@@ -246,9 +247,9 @@ onMounted(() => {
                 >
               </td>
               <td
-                class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"
+                class="whitespace-nowrap px-4 py-2 text-sm font-medium text-gray-900 dark:text-white"
               >
-                Just now
+                {{ useTimeAgo(tr.updatedAt).value }}
               </td>
               <td
                 class="whitespace-nowrap px-4 py-2 font-bold text-gray-900 dark:text-white"

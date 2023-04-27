@@ -7,29 +7,29 @@ import {
 
 import { initFlowbite } from 'flowbite'
 import { useTimeAgo } from '@vueuse/core'
-import { useNewsCatalogs, useNewsOutlines } from '@/stores/news'
+import { useProductCatalogs, useProductOutlines } from '@/stores/product'
 
-// 最新消息分類 store
-const newsCatalogsStore = useNewsCatalogs()
-// 最新消息分類 method
-const { getNewsCatalogs } = newsCatalogsStore
-// 最新消息分類
-const { data: catalog } = await getNewsCatalogs()
+// 產品分類 store
+const productCatalogsStore = useProductCatalogs()
+// 產品分類 method
+const { getProductCatalogs } = productCatalogsStore
+// 產品分類
+const { data: catalog } = await getProductCatalogs()
 // 若沒設定則預設為空陣列
-const newsCatalogs = computed(() => catalog.value?.data ?? [])
+const productCatalogs = computed(() => catalog.value?.data ?? [])
 
-// 最新消息 outline store
-const newsOutlineStore = useNewsOutlines()
-// 最新消息 outline method
-const { getNewsOutlines } = newsOutlineStore
-// 最新消息 outline
-const { data: outlines } = await getNewsOutlines()
+// 產品 outline store
+const productOutlineStore = useProductOutlines()
+// 產品 outline method
+const { getProductOutlines } = productOutlineStore
+// 產品 outline
+const { data: outlines } = await getProductOutlines()
 // 若沒設定則預設為空陣列
-const newsOutlines = computed(() => outlines.value?.data ?? [])
+const productOutlines = computed(() => outlines.value?.data ?? [])
 
 // 篩選分類
 const filterCatalog = reactive([
-  ...newsCatalogs.value.map((obj) => obj.catalog)
+  ...productCatalogs.value.map((obj) => obj.catalog)
 ])
 // 切換篩選分類
 const changeFilter = (target) => {
@@ -80,11 +80,11 @@ onMounted(() => {
         >
           <div class="flex w-full items-center space-x-3 md:w-auto">
             <NuxtLink
-              to="/news/create"
+              to="/product/create"
               class="flex items-center justify-center rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
             >
               <PlusIcon class="mr-2 h-4 w-4" />
-              新增最新消息
+              新增產品
             </NuxtLink>
             <button
               id="actionsDropdownButton"
@@ -130,13 +130,6 @@ onMounted(() => {
                   >
                 </li>
               </ul>
-              <!-- <div class="py-1">
-                <a
-                  href="#"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
-                  >刪除已選取</a
-                >
-              </div> -->
             </div>
             <button
               id="filterDropdownButton"
@@ -167,7 +160,7 @@ onMounted(() => {
             >
               <ul class="space-y-2 text-sm" aria-labelledby="dropdownDefault">
                 <li
-                  v-for="(item, key) in newsCatalogs"
+                  v-for="(item, key) in productCatalogs"
                   :key="key"
                   class="flex items-center"
                 >
@@ -210,6 +203,8 @@ onMounted(() => {
             </th>
             <th class="px-4 py-3">Product</th>
             <th class="px-4 py-3">Category</th>
+            <th class="px-4 py-3">Price</th>
+            <th class="px-4 py-3">Stock</th>
             <th class="px-4 py-3">Last Update</th>
             <th class="px-4 py-3">Action</th>
           </tr>
@@ -217,7 +212,7 @@ onMounted(() => {
       </template>
       <template #tbody>
         <tbody>
-          <template v-for="(tr, key) in newsOutlines" :key="key">
+          <template v-for="(tr, key) in productOutlines" :key="key">
             <tr
               v-if="filterCatalog.includes(tr.catalog.catalog)"
               class="border-b dark:border-gray-600"
@@ -227,8 +222,8 @@ onMounted(() => {
                   <input
                     id="checkbox-table-search-1"
                     type="checkbox"
-                    onclick="event.stopPropagation()"
                     class="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600"
+                    @click.stop=""
                   />
                   <label for="checkbox-table-search-1" class="sr-only"
                     >checkbox</label
@@ -247,6 +242,16 @@ onMounted(() => {
                 >
               </td>
               <td
+                class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"
+              >
+                $3,400
+              </td>
+              <td
+                class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"
+              >
+                0
+              </td>
+              <td
                 class="whitespace-nowrap px-4 py-2 text-sm font-medium text-gray-900 dark:text-white"
               >
                 {{ useTimeAgo(tr.updatedAt).value }}
@@ -255,7 +260,7 @@ onMounted(() => {
                 class="whitespace-nowrap px-4 py-2 font-bold text-gray-900 dark:text-white"
               >
                 <NuxtLink
-                  :to="`/news/${tr.catalog.catalog}/${tr.title}`"
+                  :to="`/product/${tr.catalog.catalog}/${tr.title}`"
                   class="font-medium text-primary-600 hover:underline dark:text-primary-500"
                 >
                   編輯

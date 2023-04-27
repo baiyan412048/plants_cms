@@ -9,7 +9,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <aside class="sticky top-0 left-0 h-full w-2/12" aria-label="Sidenav">
+  <aside class="sticky top-[66px] left-0 h-full w-2/12" aria-label="Sidenav">
     <div class="h-full overflow-y-auto bg-white py-5 px-3 dark:bg-gray-800">
       <ul class="space-y-2">
         <li>
@@ -105,6 +105,80 @@ onMounted(() => {
                 class="group flex w-full items-center rounded-lg p-2 pl-11 text-base font-normal text-gray-900 transition duration-75 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
               >
                 最新消息列表
+              </NuxtLink>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <button
+            type="button"
+            class="group flex w-full items-center rounded-lg p-2 text-base font-normal text-gray-900 transition duration-75 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+            aria-controls="dropdown-product"
+            data-collapse-toggle="dropdown-product"
+          >
+            <WindowIcon
+              class="h-5 w-5 text-gray-400 group-hover:text-gray-900"
+            />
+            <span class="ml-3 flex-1 whitespace-nowrap text-left">產品</span>
+            <ChevronDownIcon class="h-4 w-4" />
+          </button>
+          <ul id="dropdown-product" class="hidden space-y-2 py-2">
+            <li>
+              <NuxtLink
+                to="/product"
+                class="group flex w-full items-center rounded-lg p-2 pl-11 text-base font-normal text-gray-900 transition duration-75 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              >
+                單元設定
+              </NuxtLink>
+            </li>
+            <li>
+              <NuxtLink
+                to="/product/list"
+                class="group flex w-full items-center rounded-lg p-2 pl-11 text-base font-normal text-gray-900 transition duration-75 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              >
+                產品列表
+              </NuxtLink>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <button
+            type="button"
+            class="group flex w-full items-center rounded-lg p-2 text-base font-normal text-gray-900 transition duration-75 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+            aria-controls="dropdown-product-relate"
+            data-collapse-toggle="dropdown-product-relate"
+          >
+            <WindowIcon
+              class="h-5 w-5 text-gray-400 group-hover:text-gray-900"
+            />
+            <span class="ml-3 flex-1 whitespace-nowrap text-left"
+              >產品相關</span
+            >
+            <ChevronDownIcon class="h-4 w-4" />
+          </button>
+          <ul id="dropdown-product-relate" class="hidden space-y-2 py-2">
+            <li>
+              <NuxtLink
+                to="/product"
+                class="group flex w-full items-center rounded-lg p-2 pl-11 text-base font-normal text-gray-900 transition duration-75 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              >
+                購物須知
+              </NuxtLink>
+            </li>
+            <li>
+              <NuxtLink
+                to="/product/list"
+                class="group flex w-full items-center rounded-lg p-2 pl-11 text-base font-normal text-gray-900 transition duration-75 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              >
+                優惠資訊
+              </NuxtLink>
+            </li>
+            <li>
+              <NuxtLink
+                to="/product/list"
+                class="group flex w-full items-center rounded-lg p-2 pl-11 text-base font-normal text-gray-900 transition duration-75 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              >
+                加購商品
               </NuxtLink>
             </li>
           </ul>

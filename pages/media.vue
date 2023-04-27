@@ -27,7 +27,9 @@ const refreshImages = async () => {
 
 // 上傳圖片
 const uploadImage = async (event) => {
+  console.log('loading')
   await uploadMediaImage(event)
+  console.log('loaded')
   await refreshImages()
 }
 
@@ -39,10 +41,10 @@ const deleteIImage = async (hash) => {
 </script>
 
 <template>
-  <div
-    class="relative overflow-hidden bg-white shadow-md dark:bg-gray-800 sm:rounded-lg"
-  >
-    <div class="relative bg-white shadow-md dark:bg-gray-800 sm:rounded-t-lg">
+  <div class="relative bg-white shadow-md dark:bg-gray-800 sm:rounded-lg">
+    <div
+      class="sticky top-[66px] z-[5] bg-white shadow-md dark:bg-gray-800 sm:rounded-t-lg"
+    >
       <div
         class="flex flex-col items-center justify-between space-y-3 p-4 md:flex-row md:space-y-0 md:space-x-4"
       >
@@ -83,13 +85,13 @@ const deleteIImage = async (hash) => {
         <div class="rounded-lg bg-white shadow dark:bg-gray-800">
           <div class="relative">
             <img
-              class="rounded-t-lg"
+              class="w-full rounded-t-lg"
               :src="image.link"
               :alt="image.name"
               referrerpolicy="no-referrer"
             />
             <div
-              class="absolute bottom-2 right-2 z-10 cursor-pointer rounded-full bg-red-500 p-2"
+              class="z-1 absolute bottom-2 right-2 cursor-pointer rounded-full bg-red-500 p-2"
               @click="deleteIImage(image.deletehash)"
             >
               <TrashIcon class="h-5 w-5 text-white" />

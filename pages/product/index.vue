@@ -1,7 +1,7 @@
 <script setup>
 import { CheckIcon } from '@heroicons/vue/24/solid'
 
-import { useArticleSetting, useArticleCatalogs } from '@/stores/article'
+import { useProductSetting, useProductCatalogs } from '@/stores/product'
 import { useMedia } from '@/stores/media'
 
 // media store
@@ -11,60 +11,66 @@ const { getMediaImages } = mediaStore
 const mediaImagesTemp = await getMediaImages()
 
 // 單元設定 store
-const articleSettingStore = useArticleSetting()
+const productSettingStore = useProductSetting()
 // 單元設定 method
-const { getArticleSetting, putArticleSetting } = articleSettingStore
-const { data: setting, refresh: settingRefresh } = await getArticleSetting()
+const { getProductSetting, putProductSetting } = productSettingStore
+const { data: setting, refresh: settingRefresh } = await getProductSetting()
 
-// 文章分類 store
-const articleCatalogsStore = useArticleCatalogs()
-// 文章分類 method
+// 產品分類 store
+const productCatalogsStore = useProductCatalogs()
+// 產品分類 method
 const {
-  getArticleCatalogs,
-  postArticleCatalogs,
-  deleteArticleCatalogs,
-  putArticleCatalogs
-} = articleCatalogsStore
-// 取得文章分類
-const { data: res, refresh: catalogRefresh } = await getArticleCatalogs()
+  getProductCatalogs,
+  postProductCatalogs,
+  deleteProductCatalogs,
+  putProductCatalogs
+} = productCatalogsStore
+// 取得產品分類
+const { data: catalogs, refresh: catalogRefresh } = await getProductCatalogs()
 
-// 文章單元標題
+// 產品單元標題
 // 若沒設定則預設為空字串
-const title = ref(setting.value?.data[0].name ?? '')
+const title = ref(setting.value?.data[0]?.name ?? '')
 
-// 文章分類
+// 產品分類
 // 若沒設定則預設為空陣列
-const catalogs = computed(() => res.value?.data ?? [])
+const productCatalogs = computed(() => catalogs.value?.data ?? [])
 // 待操作分類儲存
-const catalogTemp = reactive({
+const productCatalogTemp = reactive({
   catalog: '',
   _id: ''
 })
-// 選擇待操作分類
-const selectCatalog = (value, id) => {
-  catalogTemp.catalog = value
-  catalogTemp._id = id
-}
-// 新增文章分類
-const postCatalog = async () => {
-  const { data } = await postArticleCatalogs(catalogTemp)
-  await catalogRefresh()
-  catalogTemp.catalog = data.value.data.catalog
-  catalogTemp._id = data.value.data._id
-}
-// 刪除文章分類
-const deleteCatalog = async () => {
-  await deleteArticleCatalogs(catalogTemp)
-  await catalogRefresh()
-  catalogTemp.catalog = ''
-  catalogTemp._id = ''
-}
-// 修改文章分類
-const putCatalog = async () => {
-  const { data } = await putArticleCatalogs(catalogs, catalogTemp)
-  await catalogRefresh()
-  catalogTemp.catalog = data.value.data.catalog
-  catalogTemp._id = data.value.data._id
+// 產品分類操作
+const productCatalogsMethods = {
+  // 選擇待操作分類
+  select(value, id) {
+    productCatalogTemp.catalog = value
+    productCatalogTemp._id = id
+  },
+  // 新增產品分類
+  async post() {
+    const { data } = await postProductCatalogs(productCatalogTemp)
+    await catalogRefresh()
+    productCatalogTemp.catalog = data.value.data.catalog
+    productCatalogTemp._id = data.value.data._id
+  },
+  // 刪除產品分類
+  async delete() {
+    await deleteProductCatalogs(productCatalogTemp)
+    await catalogRefresh()
+    productCatalogTemp.catalog = ''
+    productCatalogTemp._id = ''
+  },
+  // 修改產品分類
+  async put() {
+    const { data } = await putProductCatalogs(
+      productCatalogs,
+      productCatalogTemp
+    )
+    await catalogRefresh()
+    productCatalogTemp.catalog = data.value.data.catalog
+    productCatalogTemp._id = data.value.data._id
+  }
 }
 
 // banner 儲存
@@ -195,7 +201,7 @@ const submitForm = async () => {
   postData.name = title.value
   // toRaw 解除響應
   postData.banner = toRaw(banner)
-  await putArticleSetting(postData)
+  await putProductSetting(postData)
   await settingRefresh()
 }
 </script>
@@ -209,7 +215,7 @@ const submitForm = async () => {
         </h2>
         <div class="flex justify-between">
           <h1 class="text-l font-bold text-gray-900 dark:text-white">
-            文章專欄
+            產品專欄
           </h1>
           <button
             type="submit"
@@ -223,47 +229,47 @@ const submitForm = async () => {
       <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
         <div class="sm:col-span-2">
           <label
-            for="name"
+            for="title"
             class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
             >單元標題</label
           >
           <input
-            id="name"
+            id="title"
             v-model="title"
             type="text"
-            name="name"
+            name="title"
             class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-600 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
             placeholder="請輸入單元標題"
             required
           />
         </div>
         <div class="sm:col-span-2">
-          <label
-            for="catalog"
+          <p
             class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-            >文章分類</label
           >
+            產品分類
+          </p>
           <div class="mb-4 w-full">
             <ul class="flex flex-wrap gap-2">
               <li
-                v-for="(catalog, key) in catalogs"
+                v-for="(catalog, key) in productCatalogs"
                 :key="key"
                 class="cursor-pointer"
-                @click="selectCatalog(catalog.catalog, catalog._id)"
+                @click="
+                  productCatalogsMethods.select(catalog.catalog, catalog._id)
+                "
               >
                 <span
                   class="mr-2 rounded border border-blue-400 bg-primary-100 px-2.5 py-0.5 text-sm font-medium text-primary-800 dark:bg-gray-700 dark:text-blue-400"
-                  >{{ catalog.catalog }}</span
+                  >{{ catalog.catalog }} : {{ catalog.type }}</span
                 >
               </li>
             </ul>
           </div>
           <div class="flex w-full">
-            <label for="simple-search" class="sr-only">請選擇分類</label>
             <div class="relative w-full">
               <input
-                id="simple-search"
-                v-model="catalogTemp.catalog"
+                v-model="productCatalogTemp.catalog"
                 type="text"
                 class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 placeholder="請選擇分類"
@@ -271,30 +277,30 @@ const submitForm = async () => {
             </div>
             <button
               class="ml-2 block shrink-0 rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-              @click.prevent="postCatalog"
+              @click.prevent="productCatalogsMethods.post()"
             >
               <span>新增</span>
             </button>
             <button
               class="ml-2 block shrink-0 rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-              @click.prevent="deleteCatalog"
+              @click.prevent="productCatalogsMethods.delete()"
             >
               <span>刪除</span>
             </button>
             <button
               class="ml-2 block shrink-0 rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-              @click.prevent="putCatalog"
+              @click.prevent="productCatalogsMethods.put()"
             >
               <span>修改</span>
             </button>
           </div>
         </div>
         <div class="sm:col-span-2">
-          <label
-            for="brand"
-            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-            >選擇單元 banner 圖片</label
+          <p
+            class="mb-4 block text-sm font-medium text-gray-900 dark:text-white"
           >
+            選擇單元 banner 圖片
+          </p>
           <p
             class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
           >
@@ -335,7 +341,7 @@ const submitForm = async () => {
             </label>
           </div>
           <div
-            class="grid gap-4 rounded-lg border border-dashed border-primary-700 p-4 sm:grid-cols-2 sm:gap-6"
+            class="grid gap-4 rounded-lg border border-dashed border-primary-700 p-4 sm:grid-cols-2"
           >
             <div
               class="flex h-48 cursor-pointer items-center justify-center rounded-lg bg-primary-100 p-4 text-sm hover:bg-primary-200 dark:bg-primary-700 dark:hover:bg-primary-800"
@@ -343,7 +349,7 @@ const submitForm = async () => {
             >
               <img
                 v-if="banner.desktop"
-                class="object-contain"
+                class="h-full w-full object-contain"
                 :src="banner.desktop"
                 alt=""
               />
@@ -358,7 +364,7 @@ const submitForm = async () => {
             >
               <img
                 v-if="banner.mobile"
-                class="object-contain"
+                class="h-full w-full object-contain"
                 :src="banner.mobile"
                 alt=""
               />

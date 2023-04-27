@@ -72,7 +72,8 @@ const putCatalog = async () => {
 // 若沒設定則預設為空字串
 const banner = reactive({
   desktop: setting.value?.data[0]?.banner?.desktop ?? '',
-  mobile: setting.value?.data[0]?.banner?.mobile ?? ''
+  mobile: setting.value?.data[0]?.banner?.mobile ?? '',
+  color: setting.value?.data[0]?.banner?.color ?? 'black'
 })
 
 // desktop banner 已選取圖片
@@ -295,6 +296,45 @@ const submitForm = async () => {
             class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
             >選擇單元 banner 圖片</label
           >
+          <p
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            banner 文字顏色
+          </p>
+          <div class="mb-4 flex items-center gap-4">
+            <label class="relative inline-flex cursor-pointer items-center">
+              <input
+                v-model="banner.color"
+                type="radio"
+                name="fontColor"
+                value="black"
+                class="peer sr-only"
+              />
+              <div
+                class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800"
+              ></div>
+              <span
+                class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                >黑色</span
+              >
+            </label>
+            <label class="relative inline-flex cursor-pointer items-center">
+              <input
+                v-model="banner.color"
+                type="radio"
+                name="fontColor"
+                value="white"
+                class="peer sr-only"
+              />
+              <div
+                class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800"
+              ></div>
+              <span
+                class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                >白色</span
+              >
+            </label>
+          </div>
           <div
             class="grid gap-4 rounded-lg border border-dashed border-primary-700 p-4 sm:grid-cols-2 sm:gap-6"
           >

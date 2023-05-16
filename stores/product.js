@@ -407,6 +407,164 @@ export const useProductEnv = defineStore('productEnv', () => {
   }
 })
 
+// 產品相關
+export const useProductRelevant = defineStore('useProductRelevant', () => {
+  const runtimeConfig = useRuntimeConfig()
+  const { apiBaseUrl: API_BASE_URL } = runtimeConfig.public
+
+  // 取得產品優惠
+  const getProductDiscount = async (title) => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/product/discount${title ? `/${title}` : ''}`,
+        {
+          pick: ['data']
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // 新增產品優惠
+  const postProductDiscount = async (postData) => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/product/discount`,
+        {
+          method: 'POST',
+          body: postData,
+          pick: ['data']
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // 刪除產品優惠
+  const deleteProductDiscount = async (postData) => {
+    const { title } = postData
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/product/discount/${title}`,
+        {
+          method: 'DELETE',
+          body: postData
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // 修改產品優惠
+  const putProductDiscount = async (postData) => {
+    const { title } = postData
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/product/discount/${title}`,
+        {
+          method: 'PUT',
+          body: postData
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // 取得加購商品
+  const getProductPurchase = async (title) => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/product/purchase${title ? `/${title}` : ''}`,
+        {
+          pick: ['data']
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // 新增加購商品
+  const postProductPurchase = async (postData) => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/product/purchase`,
+        {
+          method: 'POST',
+          body: postData,
+          pick: ['data']
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // 刪除加購商品
+  const deleteProductPurchase = async (id, title) => {
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/product/purchase/${title}`,
+        {
+          method: 'DELETE',
+          body: {
+            id
+          }
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // 修改加購商品
+  const putProductPurchase = async (postData) => {
+    const { title } = postData
+    try {
+      const { data, pending, error, refresh } = await useFetch(
+        `${API_BASE_URL}/api/product/purchase/${title}`,
+        {
+          method: 'PUT',
+          body: postData
+        }
+      )
+
+      return { data, pending, error, refresh }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  return {
+    getProductDiscount,
+    postProductDiscount,
+    deleteProductDiscount,
+    putProductDiscount,
+    getProductPurchase,
+    postProductPurchase,
+    deleteProductPurchase,
+    putProductPurchase
+  }
+})
+
 // 產品 outline
 export const useProductOutline = defineStore('productOutline', () => {
   const runtimeConfig = useRuntimeConfig()
@@ -441,7 +599,7 @@ export const useProductDetail = defineStore('productDetail', () => {
   const getProductDetail = async (catalog, title) => {
     try {
       const { data, pending, error, refresh } = await useFetch(
-        `${API_BASE_URL}/api/product/${catalog}/${title}`,
+        `${API_BASE_URL}/api/product/${catalog}${title ? `/${title}` : ''}`,
         {
           pick: ['data']
         }

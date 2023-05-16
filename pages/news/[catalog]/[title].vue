@@ -1,11 +1,11 @@
 <script setup>
 import { CheckIcon, TrashIcon } from '@heroicons/vue/24/solid'
 
-import { useNewsCatalogs, useNewsDetail } from '@/stores/news'
+import { useNewsCatalog, useNewsDetail } from '@/stores/news'
 import { useMedia } from '@/stores/media'
 
 const route = useRoute()
-const { catalog, title } = route.params
+const { params } = route
 
 // media store
 const mediaStore = useMedia()
@@ -14,19 +14,19 @@ const { getMediaImages } = mediaStore
 const mediaImagesTemp = await getMediaImages()
 
 // 最新消息分類 store
-const newsCatalogsStore = useNewsCatalogs()
+const newsCatalogStore = useNewsCatalog()
 // 最新消息分類 method
-const { getNewsCatalogs } = newsCatalogsStore
+const { getNewsCatalog } = newsCatalogStore
 // 最新消息分類
-const { data: catalogs } = await getNewsCatalogs()
-const newsCatalogs = computed(() => catalogs.value.data)
+const { data: catalog } = await getNewsCatalog()
+const newsCatalog = computed(() => catalog.value.data)
 
 // 最新消息 detail 建立 store
 const newsDetailStore = useNewsDetail()
 // 最新消息 detail 建立 method
 const { getNewsDetail, putNewsDetail, deleteNewsDetail } = newsDetailStore
 // 最新消息 detail
-const { data: detail } = await getNewsDetail(catalog, title)
+const { data: detail } = await getNewsDetail(params.catalog, params.title)
 const newsDetail = computed(() => detail.value.data)
 
 // 最新消息 id
@@ -133,23 +133,24 @@ const updateParagraphImages = (id, modalImages) => {
 
 // 刪除最新消息
 const deleteDetail = async () => {
-  await deleteNewsDetail($id, catalog, title)
+  await deleteNewsDetail($id.value)
 }
 
 // 送出表單 (修改)
 const submitForm = async () => {
-  const postData = {}
-  postData.id = $id.value
-  postData.title = outlineStore.title
-  postData.image = outlineStore.image
-  postData.catalog = outlineStore.catalog
-  // toRaw 解除響應
-  postData.contents = toRaw(paragraphStore)
+  const postData = {
+    id: $id.value,
+    title: outlineStore.title,
+    image: outlineStore.image,
+    catalog: outlineStore.catalog,
+    contents: toRaw(paragraphStore)
+  }
+
   postData.contents.forEach((obj) => {
     obj.images = toRaw(obj.images)
   })
 
-  await putNewsDetail(catalog, title, postData)
+  await putNewsDetail(postData)
 }
 </script>
 
@@ -185,7 +186,7 @@ const submitForm = async () => {
       </div>
       <NewsOutline
         :outline="outlineStore"
-        :catalogs="newsCatalogs"
+        :catalog="newsCatalog"
         @update-title="updateOutlineTitle"
         @update-catalog="updateOutlineCatalog"
         @toggle-modal="toggleOutlineModal"

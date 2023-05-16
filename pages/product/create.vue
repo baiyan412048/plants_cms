@@ -1,11 +1,12 @@
 <script setup>
 import { CheckIcon, PlusIcon } from '@heroicons/vue/24/solid'
-
+import Multiselect from '@vueform/multiselect'
 import {
   useProductCatalog,
   useProductSize,
   useProductDiff,
   useProductEnv,
+  useProductRelevant,
   useProductDetail
 } from '@/stores/product'
 import { useMedia } from '@/stores/media'
@@ -15,6 +16,18 @@ const mediaStore = useMedia()
 // media method
 const { getMediaImages } = mediaStore
 const mediaImagesTemp = await getMediaImages()
+
+// 產品相關 store
+const productRelevantStore = useProductRelevant()
+// 產品相關 method
+const { getProductPurchase } = productRelevantStore
+// 加購商品
+const { data: purchase } = await getProductPurchase()
+const productPurchase = computed(() => {
+  if (!purchase.value?.data) return []
+
+  return purchase.value?.data.map((obj) => obj.title)
+})
 
 // 產品分類 store
 const productCatalogStore = useProductCatalog()
@@ -27,8 +40,7 @@ const productCatalog = computed(() => catalog.value?.data ?? [])
 // 產品尺寸 store
 const productSizeStore = useProductSize()
 // 產品尺寸 method
-const { getProductSize, postProductSize, deleteProductSize, putProductSize } =
-  productSizeStore
+const { getProductSize } = productSizeStore
 // 取得產品尺寸
 const { data: size, refresh: sizeRefresh } = await getProductSize()
 const productSize = computed(() => size.value?.data ?? [])
@@ -36,18 +48,16 @@ const productSize = computed(() => size.value?.data ?? [])
 // 產品難易度 store
 const productDiffStore = useProductDiff()
 // 產品難易度 method
-const { getProductDiff, postProductDiff, deleteProductDiff, putProductDiff } =
-  productDiffStore
+const { getProductDiff } = productDiffStore
 // 取得產品難易度
 const { data: diff, refresh: diffRefresh } = await getProductDiff()
 const productDiff = computed(() => diff.value?.data ?? [])
 
-// 產品難易度 store
+// 產品環境 store
 const productEnvStore = useProductEnv()
-// 產品難易度 method
-const { getProductEnv, postProductEnv, deleteProductEnv, putProductEnv } =
-  productEnvStore
-// 取得產品難易度
+// 產品環境 method
+const { getProductEnv } = productEnvStore
+// 取得產品環境
 const { data: env, refresh: envRefresh } = await getProductEnv()
 const productEnv = computed(() => env.value?.data ?? [])
 
@@ -144,7 +154,9 @@ const toggleOutlineModal = () => {
 // 其他細項設定
 const detailSetting = reactive({
   dep: '',
-  sliders: [],
+  notes: '',
+  purchase: [],
+  slides: [],
   size: ''
 })
 // 植物類別細項設定
@@ -170,7 +182,7 @@ const updateSlidersImage = () => {
     .filter((obj) => obj.selected)
     .map((obj) => obj.link)
 
-  detailSetting.sliders.splice(0, store.length, ...targets)
+  detailSetting.slides.splice(0, store.length, ...targets)
 
   // 關閉選擇圖片燈箱
   toggleSlidersModal()
@@ -199,15 +211,15 @@ const cancelSelectSlidersImage = (temp) => {
   toggleSlidersModal()
 }
 // 燈箱開關狀態
-const slidersModalState = ref(false)
+const slidesModalState = ref(false)
 // 開關 modal
 const toggleSlidersModal = () => {
-  if (slidersModalState.value) {
+  if (slidesModalState.value) {
     document.body.classList.remove('overflow-hidden')
   } else {
     document.body.classList.add('overflow-hidden')
   }
-  slidersModalState.value = !slidersModalState.value
+  slidesModalState.value = !slidesModalState.value
 }
 
 // 植物介紹段落儲存
@@ -326,8 +338,10 @@ const submitForm = async () => {
   postData.price = outlineStore.price
   postData.stock = outlineStore.stock
   // more detail
-  postData.sliders = detailSetting.sliders
+  postData.slides = detailSetting.slides
   postData.dep = detailSetting.dep
+  postData.notes = detailSetting.notes
+  postData.purchase = detailSetting.purchase
   postData.size = detailSetting.size
   // plants type setting
   postData.diff = plantsDetailSetting.diff
@@ -385,8 +399,8 @@ const submitForm = async () => {
             請選擇圖片
           </button>
         </div>
-        <ul v-if="detailSetting.sliders" class="grid sm:grid-cols-4 sm:gap-6">
-          <li v-for="(src, key) in detailSetting.sliders" :key="key">
+        <ul v-if="detailSetting.slides" class="grid sm:grid-cols-4 sm:gap-6">
+          <li v-for="(src, key) in detailSetting.slides" :key="key">
             <img :src="src" alt="" />
           </li>
         </ul>
@@ -405,6 +419,35 @@ const submitForm = async () => {
           placeholder="請輸入產品描述"
           required
         ></textarea>
+      </div>
+      <div class="mt-4 sm:col-span-2 sm:mt-6">
+        <label
+          for="notes"
+          class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >購物須知</label
+        >
+        <textarea
+          id="notes"
+          v-model="detailSetting.notes"
+          rows="4"
+          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
+          placeholder="請輸入購物須知"
+          required
+        ></textarea>
+      </div>
+      <div class="mt-4 sm:col-span-2 sm:mt-6">
+        <label
+          for="purchase"
+          class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >加購商品</label
+        >
+        <Multiselect
+          v-model="detailSetting.purchase"
+          mode="tags"
+          placeholder="請選擇加購商品"
+          :close-on-select="false"
+          :options="productPurchase"
+        />
       </div>
       <div class="mt-4 flex gap-4 sm:col-span-2 sm:mt-6 sm:gap-6">
         <div class="w-full">
@@ -538,7 +581,7 @@ const submitForm = async () => {
       @toggle-modal="toggleOutlineModal"
     />
     <ModalSelectImage
-      v-show="slidersModalState"
+      v-show="slidesModalState"
       :images="selectedSlidersImage"
       :limit="6"
       @update-image="updateSlidersImage"
@@ -548,3 +591,7 @@ const submitForm = async () => {
     />
   </div>
 </template>
+
+<style scoped>
+@import '@vueform/multiselect/themes/default.css';
+</style>

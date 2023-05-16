@@ -39,33 +39,33 @@ const catalogs = computed(() => res.value?.data ?? [])
 // 待操作分類儲存
 const catalogTemp = reactive({
   catalog: '',
-  _id: ''
+  id: ''
 })
 // 選擇待操作分類
 const selectCatalog = (value, id) => {
   catalogTemp.catalog = value
-  catalogTemp._id = id
+  catalogTemp.id = id
 }
 // 新增最新消息分類
 const postCatalog = async () => {
   const { data } = await postNewsCatalogs(catalogTemp)
   await catalogRefresh()
   catalogTemp.catalog = data.value.data.catalog
-  catalogTemp._id = data.value.data._id
+  catalogTemp.id = data.value.data._id
 }
 // 刪除最新消息分類
 const deleteCatalog = async () => {
   await deleteNewsCatalogs(catalogTemp)
   await catalogRefresh()
   catalogTemp.catalog = ''
-  catalogTemp._id = ''
+  catalogTemp.id = ''
 }
 // 修改最新消息分類
 const putCatalog = async () => {
   const { data } = await putNewsCatalogs(catalogs, catalogTemp)
   await catalogRefresh()
   catalogTemp.catalog = data.value.data.catalog
-  catalogTemp._id = data.value.data._id
+  catalogTemp.id = data.value.data._id
 }
 
 // banner 儲存

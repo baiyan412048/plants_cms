@@ -1,7 +1,7 @@
 <script setup>
 import { CheckIcon, PlusIcon } from '@heroicons/vue/24/solid'
 
-import { useArticleCatalogs, useArticleDetail } from '@/stores/article'
+import { useArticleCatalog, useArticleDetail } from '@/stores/article'
 import { useMedia } from '@/stores/media'
 
 // media store
@@ -11,12 +11,12 @@ const { getMediaImages } = mediaStore
 const mediaImagesTemp = await getMediaImages()
 
 // 文章分類 store
-const articleCatalogsStore = useArticleCatalogs()
+const articleCatalogStore = useArticleCatalog()
 // 文章分類 method
-const { getArticleCatalogs } = articleCatalogsStore
+const { getArticleCatalog } = articleCatalogStore
 // 文章分類
-const { data: catalog } = await getArticleCatalogs()
-const articleCatalogs = computed(() => catalog.value.data)
+const { data: catalog } = await getArticleCatalog()
+const articleCatalog = computed(() => catalog.value.data)
 
 // 文章建立 store
 const articleDetailStore = useArticleDetail()
@@ -159,7 +159,7 @@ const submitForm = async () => {
       </div>
       <ArticleOutline
         :outline="outlineStore"
-        :catalogs="articleCatalogs"
+        :catalog="articleCatalog"
         @update-title="updateOutlineTitle"
         @update-catalog="updateOutlineCatalog"
         @toggle-modal="toggleOutlineModal"

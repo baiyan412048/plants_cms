@@ -6,7 +6,7 @@ const props = defineProps({
       return {}
     }
   },
-  catalogs: {
+  catalog: {
     type: Array,
     default() {
       return []
@@ -54,7 +54,7 @@ const catalog = computed(() => props.outline?.catalog)
       >
         <option selected disabled hidden>請選擇文章分類</option>
         <option
-          v-for="(option, key) in props.catalogs"
+          v-for="(option, key) in props.catalog"
           :key="key"
           :value="option.catalog"
         >

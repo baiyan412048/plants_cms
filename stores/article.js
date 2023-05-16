@@ -38,15 +38,15 @@ export const useArticleSetting = defineStore('articleSetting', () => {
 })
 
 // 文章分類
-export const useArticleCatalogs = defineStore('articleCatalogs', () => {
+export const useArticleCatalog = defineStore('articleCatalog', () => {
   const runtimeConfig = useRuntimeConfig()
   const { apiBaseUrl: API_BASE_URL } = runtimeConfig.public
 
   // 取得文章分類
-  const getArticleCatalogs = async () => {
+  const getArticleCatalog = async () => {
     try {
       const { data, pending, error, refresh } = await useFetch(
-        `${API_BASE_URL}/api/article/catalogs`,
+        `${API_BASE_URL}/api/article/catalog`,
         {
           pick: ['data']
         }
@@ -59,7 +59,7 @@ export const useArticleCatalogs = defineStore('articleCatalogs', () => {
   }
 
   // 新增文章分類
-  const postArticleCatalogs = async ({ catalog }) => {
+  const postArticleCatalog = async (catalog) => {
     try {
       const { data, pending, error, refresh } = await useFetch(
         `${API_BASE_URL}/api/article/catalog`,
@@ -79,14 +79,14 @@ export const useArticleCatalogs = defineStore('articleCatalogs', () => {
   }
 
   // 刪除文章分類
-  const deleteArticleCatalogs = async ({ catalog, _id }) => {
+  const deleteArticleCatalog = async ({ catalog, id }) => {
     try {
       const { data, pending, error, refresh } = await useFetch(
-        `${API_BASE_URL}/api/article/catalog/${catalog}`,
+        `${API_BASE_URL}/api/article/catalog/${id}`,
         {
           method: 'DELETE',
           body: {
-            _id
+            catalog
           }
         }
       )
@@ -98,21 +98,19 @@ export const useArticleCatalogs = defineStore('articleCatalogs', () => {
   }
 
   // 修改文章分類
-  const putArticleCatalogs = async (catalogs, { catalog, _id }) => {
+  const putArticleCatalog = async (catalogs, { catalog, id }) => {
     // 是否為新的分類名稱
-    if (
-      catalogs.value.some((obj) => obj._id == _id && obj.catalog == catalog)
-    ) {
+    if (catalogs.value.some((obj) => obj._id == id && obj.catalog == catalog)) {
       return
     }
 
     try {
       const { data, pending, error, refresh } = await useFetch(
-        `${API_BASE_URL}/api/article/catalog/${catalog}`,
+        `${API_BASE_URL}/api/article/catalog/${id}`,
         {
           method: 'PUT',
           body: {
-            _id
+            catalog
           }
         }
       )
@@ -124,19 +122,19 @@ export const useArticleCatalogs = defineStore('articleCatalogs', () => {
   }
 
   return {
-    getArticleCatalogs,
-    postArticleCatalogs,
-    deleteArticleCatalogs,
-    putArticleCatalogs
+    getArticleCatalog,
+    postArticleCatalog,
+    deleteArticleCatalog,
+    putArticleCatalog
   }
 })
 
 // 文章 outlines
-export const useArticleOutlines = defineStore('articleOutlines', () => {
+export const useArticleOutline = defineStore('articleOutline', () => {
   const runtimeConfig = useRuntimeConfig()
   const { apiBaseUrl: API_BASE_URL } = runtimeConfig.public
 
-  const getArticleOutlines = async () => {
+  const getArticleOutline = async () => {
     try {
       const { data, pending, error, refresh } = await useFetch(
         `${API_BASE_URL}/api/article`,
@@ -152,7 +150,7 @@ export const useArticleOutlines = defineStore('articleOutlines', () => {
   }
 
   return {
-    getArticleOutlines
+    getArticleOutline
   }
 })
 
@@ -193,10 +191,11 @@ export const useArticleDetail = defineStore('articleDetail', () => {
     }
   }
 
-  const putArticleDetail = async (catalog, title, postData) => {
+  const putArticleDetail = async (postData) => {
+    const { id } = postData
     try {
       const { data, pending, error, refresh } = await useFetch(
-        `${API_BASE_URL}/api/article/${catalog}/${title}`,
+        `${API_BASE_URL}/api/article/${id}`,
         {
           method: 'PUT',
           body: postData,
@@ -210,15 +209,12 @@ export const useArticleDetail = defineStore('articleDetail', () => {
     }
   }
 
-  const deleteArticleDetail = async (id, catalog, title) => {
+  const deleteArticleDetail = async (id) => {
     try {
       const { data, pending, error, refresh } = await useFetch(
-        `${API_BASE_URL}/api/article/${catalog}/${title}`,
+        `${API_BASE_URL}/api/article/${id}`,
         {
           method: 'DELETE',
-          body: {
-            id
-          },
           pick: ['data']
         }
       )

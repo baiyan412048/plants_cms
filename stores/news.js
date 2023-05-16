@@ -79,14 +79,14 @@ export const useNewsCatalogs = defineStore('newsCatalogs', () => {
   }
 
   // 刪除最新消息分類
-  const deleteNewsCatalogs = async ({ catalog, _id }) => {
+  const deleteNewsCatalogs = async ({ catalog, id }) => {
     try {
       const { data, pending, error, refresh } = await useFetch(
-        `${API_BASE_URL}/api/news/catalog/${catalog}`,
+        `${API_BASE_URL}/api/news/catalog/${id}`,
         {
           method: 'DELETE',
           body: {
-            _id
+            catalog
           }
         }
       )
@@ -98,21 +98,19 @@ export const useNewsCatalogs = defineStore('newsCatalogs', () => {
   }
 
   // 修改最新消息分類
-  const putNewsCatalogs = async (catalogs, { catalog, _id }) => {
+  const putNewsCatalogs = async (catalogs, { catalog, id }) => {
     // 是否為新的分類名稱
-    if (
-      catalogs.value.some((obj) => obj._id == _id && obj.catalog == catalog)
-    ) {
+    if (catalogs.value.some((obj) => obj._id == id && obj.catalog == catalog)) {
       return
     }
 
     try {
       const { data, pending, error, refresh } = await useFetch(
-        `${API_BASE_URL}/api/news/catalog/${catalog}`,
+        `${API_BASE_URL}/api/news/catalog/${id}`,
         {
           method: 'PUT',
           body: {
-            _id
+            catalog
           }
         }
       )
@@ -193,10 +191,11 @@ export const useNewsDetail = defineStore('newsDetail', () => {
     }
   }
 
-  const putNewsDetail = async (catalog, title, postData) => {
+  const putNewsDetail = async (postData) => {
+    const { id } = postData
     try {
       const { data, pending, error, refresh } = await useFetch(
-        `${API_BASE_URL}/api/news/${catalog}/${title}`,
+        `${API_BASE_URL}/api/news/${id}`,
         {
           method: 'PUT',
           body: postData,
@@ -210,15 +209,12 @@ export const useNewsDetail = defineStore('newsDetail', () => {
     }
   }
 
-  const deleteNewsDetail = async (id, catalog, title) => {
+  const deleteNewsDetail = async (id) => {
     try {
       const { data, pending, error, refresh } = await useFetch(
-        `${API_BASE_URL}/api/news/${catalog}/${title}`,
+        `${API_BASE_URL}/api/news/${title}`,
         {
           method: 'DELETE',
-          body: {
-            id
-          },
           pick: ['data']
         }
       )

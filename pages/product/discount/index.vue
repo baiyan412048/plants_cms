@@ -7,29 +7,29 @@ import {
 
 import { initFlowbite } from 'flowbite'
 import { useTimeAgo } from '@vueuse/core'
-import { useArticleCatalog, useArticleOutline } from '@/stores/article'
+import { useProductCatalog, useProductOutline } from '@/stores/product'
 
-// 文章分類 store
-const articleCatalogStore = useArticleCatalog()
-// 文章分類 method
-const { getArticleCatalog } = articleCatalogStore
-// 文章分類
-const { data: catalog } = await getArticleCatalog()
+// 產品分類 store
+const productCatalogStore = useProductCatalog()
+// 產品分類 method
+const { getProductCatalog } = productCatalogStore
+// 產品分類
+const { data: catalog } = await getProductCatalog()
 // 若沒設定則預設為空陣列
-const articleCatalog = computed(() => catalog.value?.data ?? [])
+const productCatalog = computed(() => catalog.value?.data ?? [])
 
-// 文章 outline store
-const articleOutlineStore = useArticleOutline()
-// 文章 outline method
-const { getArticleOutline } = articleOutlineStore
-// 文章 outline
-const { data: outline } = await getArticleOutline()
+// 產品 outline store
+const productOutlineStore = useProductOutline()
+// 產品 outline method
+const { getProductOutline } = productOutlineStore
+// 產品 outline
+const { data: outline } = await getProductOutline()
 // 若沒設定則預設為空陣列
-const articleOutline = computed(() => outline.value?.data ?? [])
+const productOutline = computed(() => outline.value?.data ?? [])
 
 // 篩選分類
 const filterCatalog = reactive([
-  ...articleCatalog.value.map((obj) => obj.catalog)
+  ...productCatalog.value.map((obj) => obj.catalog)
 ])
 // 切換篩選分類
 const changeFilter = (target) => {
@@ -80,11 +80,11 @@ onMounted(() => {
         >
           <div class="flex w-full items-center space-x-3 md:w-auto">
             <NuxtLink
-              to="/article/create"
+              to="/product/discount/create"
               class="flex items-center justify-center rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
             >
               <PlusIcon class="mr-2 h-4 w-4" />
-              新增文章
+              新增優惠資訊
             </NuxtLink>
             <button
               id="actionsDropdownButton"
@@ -130,63 +130,6 @@ onMounted(() => {
                   >
                 </li>
               </ul>
-              <!-- <div class="py-1">
-                <a
-                  href="#"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
-                  >刪除已選取</a
-                >
-              </div> -->
-            </div>
-            <button
-              id="filterDropdownButton"
-              data-dropdown-toggle="filterDropdown"
-              class="flex w-full items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700 md:w-auto"
-              type="button"
-            >
-              <FunnelIcon class="mr-2 h-4 w-4 text-gray-500" />
-              篩選
-              <svg
-                class="-mr-1 ml-1.5 h-5 w-5"
-                fill="currentColor"
-                viewbox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <path
-                  clip-rule="evenodd"
-                  fill-rule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                />
-              </svg>
-            </button>
-            <!-- Dropdown menu -->
-            <div
-              id="filterDropdown"
-              class="z-10 hidden w-48 rounded-lg bg-white p-3 shadow dark:bg-gray-700"
-            >
-              <ul class="space-y-2 text-sm" aria-labelledby="dropdownDefault">
-                <li
-                  v-for="(item, key) in articleCatalog"
-                  :key="key"
-                  class="flex items-center"
-                >
-                  <input
-                    :id="item.catalog"
-                    type="checkbox"
-                    checked
-                    :value="item.catalog"
-                    class="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
-                    @input="changeFilter($event.target)"
-                  />
-                  <label
-                    :for="item.catalog"
-                    class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100"
-                  >
-                    {{ item.catalog }}
-                  </label>
-                </li>
-              </ul>
             </div>
           </div>
         </div>
@@ -210,6 +153,8 @@ onMounted(() => {
             </th>
             <th class="px-4 py-3">Product</th>
             <th class="px-4 py-3">Category</th>
+            <th class="px-4 py-3">Price</th>
+            <th class="px-4 py-3">Stock</th>
             <th class="px-4 py-3">Last Update</th>
             <th class="px-4 py-3">Action</th>
           </tr>
@@ -217,51 +162,8 @@ onMounted(() => {
       </template>
       <template #tbody>
         <tbody>
-          <template v-for="(tr, key) in articleOutline" :key="key">
-            <tr
-              v-if="filterCatalog.includes(tr.catalog.catalog)"
-              class="border-b dark:border-gray-600"
-            >
-              <td class="w-4 px-4 py-3">
-                <div class="flex items-center">
-                  <input
-                    id="checkbox-table-search-1"
-                    type="checkbox"
-                    onclick="event.stopPropagation()"
-                    class="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600"
-                  />
-                  <label for="checkbox-table-search-1" class="sr-only"
-                    >checkbox</label
-                  >
-                </div>
-              </td>
-              <td
-                class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"
-              >
-                {{ tr.title }}
-              </td>
-              <td class="px-4 py-2">
-                <span
-                  class="rounded bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-800 dark:bg-primary-900 dark:text-primary-300"
-                  >{{ tr.catalog.catalog }}</span
-                >
-              </td>
-              <td
-                class="whitespace-nowrap px-4 py-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                {{ useTimeAgo(tr.updatedAt).value }}
-              </td>
-              <td
-                class="whitespace-nowrap px-4 py-2 font-bold text-gray-900 dark:text-white"
-              >
-                <NuxtLink
-                  :to="`/article/${tr.catalog.catalog}/${tr.title}`"
-                  class="font-medium text-primary-600 hover:underline dark:text-primary-500"
-                >
-                  編輯
-                </NuxtLink>
-              </td>
-            </tr>
+          <template v-for="(tr, key) in productOutline" :key="key">
+            <div>test {{ key }}</div>
           </template>
         </tbody>
       </template>

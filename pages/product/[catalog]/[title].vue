@@ -1,8 +1,18 @@
 <script setup>
-import { CheckIcon, PlusIcon } from '@heroicons/vue/24/solid'
-
-import { useProductCatalogs, useProductDetail } from '@/stores/product'
+import { CheckIcon, TrashIcon } from '@heroicons/vue/24/solid'
+import Multiselect from '@vueform/multiselect'
+import {
+  useProductCatalog,
+  useProductSize,
+  useProductDiff,
+  useProductEnv,
+  useProductRelevant,
+  useProductDetail
+} from '@/stores/product'
 import { useMedia } from '@/stores/media'
+
+const route = useRoute()
+const { params } = route
 
 // media store
 const mediaStore = useMedia()
@@ -10,27 +20,75 @@ const mediaStore = useMedia()
 const { getMediaImages } = mediaStore
 const mediaImagesTemp = await getMediaImages()
 
+// 產品相關 store
+const productRelevantStore = useProductRelevant()
+// 產品相關 method
+const { getProductPurchase } = productRelevantStore
+// 加購商品
+const { data: purchase } = await getProductPurchase()
+const productPurchase = computed(() => {
+  if (!purchase.value?.data) return []
+
+  return purchase.value?.data.map((obj) => {
+    return {
+      value: obj._id,
+      label: obj.title
+    }
+  })
+})
+
 // 產品分類 store
-const productCatalogsStore = useProductCatalogs()
+const productCatalogStore = useProductCatalog()
 // 產品分類 method
-const { getProductCatalogs } = productCatalogsStore
+const { getProductCatalog } = productCatalogStore
 // 產品分類
-const { data: catalog } = await getProductCatalogs()
-const productCatalogs = computed(() => catalog.value?.data ?? [])
+const { data: catalog } = await getProductCatalog()
+const productCatalog = computed(() => catalog.value?.data ?? [])
+
+// 產品尺寸 store
+const productSizeStore = useProductSize()
+// 產品尺寸 method
+const { getProductSize } = productSizeStore
+// 取得產品尺寸
+const { data: size, refresh: sizeRefresh } = await getProductSize()
+const productSize = computed(() => size.value?.data ?? [])
+
+// 產品難易度 store
+const productDiffStore = useProductDiff()
+// 產品難易度 method
+const { getProductDiff } = productDiffStore
+// 取得產品難易度
+const { data: diff, refresh: diffRefresh } = await getProductDiff()
+const productDiff = computed(() => diff.value?.data ?? [])
+
+// 產品環境 store
+const productEnvStore = useProductEnv()
+// 產品環境 method
+const { getProductEnv } = productEnvStore
+// 取得產品環境
+const { data: env, refresh: envRefresh } = await getProductEnv()
+const productEnv = computed(() => env.value?.data ?? [])
 
 // 產品建立 store
 const productDetailStore = useProductDetail()
 // 產品建立 method
-const { postProductDetail } = productDetailStore
+const { getProductDetail, putProductDetail, deleteProductDetail } =
+  productDetailStore
+// 產品
+const { data: detail } = await getProductDetail(params.catalog, params.title)
+const productDetail = computed(() => detail.value.data)
+
+// 產品 id
+const $id = ref(productDetail.value._id)
 
 // 產品 outline 儲存
 const outlineStore = reactive({
-  title: '',
-  image: '',
-  catalog: '',
-  type: '',
-  stock: 0,
-  price: 0
+  title: productDetail.value.outline.title,
+  image: productDetail.value.outline.image,
+  catalog: productDetail.value.outline.catalog.catalog,
+  type: productDetail.value.outline.catalog.type,
+  stock: productDetail.value.outline.stock,
+  price: productDetail.value.outline.price
 })
 
 // 更新 outline title 設定
@@ -110,14 +168,16 @@ const toggleOutlineModal = () => {
 
 // 其他細項設定
 const detailSetting = reactive({
-  dep: '',
-  sliders: [],
-  size: ''
+  dep: productDetail.value.dep,
+  notes: productDetail.value.notes,
+  purchase: productDetail.value?.purchase.map((obj) => obj._id) ?? [],
+  slides: productDetail.value?.slides ?? [],
+  size: productDetail.value.outline.size.size
 })
 // 植物類別細項設定
 const plantsDetailSetting = reactive({
-  diff: '',
-  env: ''
+  diff: productDetail.value.outline.diff.diff,
+  env: productDetail.value.outline.env.env
 })
 
 // 其他細項輪播 已選取圖片
@@ -125,7 +185,7 @@ const selectedSlidersImage = reactive([
   // 深拷貝原陣列
   ...JSON.parse(JSON.stringify(mediaImagesTemp)).map((obj) => {
     obj.selected = false
-    if (obj.link == outlineStore.image) {
+    if (detailSetting.slides.includes(obj.link)) {
       obj.selected = true
     }
     return obj
@@ -137,7 +197,7 @@ const updateSlidersImage = () => {
     .filter((obj) => obj.selected)
     .map((obj) => obj.link)
 
-  detailSetting.sliders.splice(0, store.length, ...targets)
+  detailSetting.slides.splice(0, selectedSlidersImage.length, ...targets)
 
   // 關閉選擇圖片燈箱
   toggleSlidersModal()
@@ -166,25 +226,27 @@ const cancelSelectSlidersImage = (temp) => {
   toggleSlidersModal()
 }
 // 燈箱開關狀態
-const slidersModalState = ref(false)
+const slidesModalState = ref(false)
 // 開關 modal
 const toggleSlidersModal = () => {
-  if (slidersModalState.value) {
+  if (slidesModalState.value) {
     document.body.classList.remove('overflow-hidden')
   } else {
     document.body.classList.add('overflow-hidden')
   }
-  slidersModalState.value = !slidersModalState.value
+  slidesModalState.value = !slidesModalState.value
 }
 
 // 植物介紹段落儲存
 const paragraphStore = reactive([
-  {
-    id: 0,
-    style: 'single',
-    images: [],
-    content: ''
-  }
+  ...productDetail.value.contents.map((obj, id) => {
+    return {
+      id,
+      style: obj.style,
+      images: obj.images,
+      content: obj.content
+    }
+  })
 ])
 // 更新 paragraph style 設定
 const updateParagraphStyle = (id, value) => {
@@ -202,24 +264,17 @@ const updateParagraphImages = (id, modalImages) => {
     .map((obj) => obj.link)
   store.splice(0, store.length, ...targets)
 }
-// 新增植物介紹段落
-const addParagraph = () => {
-  paragraphStore.push({
-    id: paragraphStore.length,
-    style: 'single',
-    images: [],
-    content: ''
-  })
-}
 
 // 包裝服務段落儲存
 const packageStore = reactive([
-  {
-    id: 0,
-    style: 'single',
-    images: [],
-    content: ''
-  }
+  ...productDetail.value.package.map((obj, id) => {
+    return {
+      id,
+      style: obj.style,
+      images: obj.images,
+      content: obj.content
+    }
+  })
 ])
 // 更新 package style 設定
 const updatePackageStyle = (id, value) => {
@@ -237,24 +292,17 @@ const updatePackageImages = (id, modalImages) => {
     .map((obj) => obj.link)
   store.splice(0, store.length, ...targets)
 }
-// 新增包裝服務段落
-const addPackage = () => {
-  packageStore.push({
-    id: packageStore.length,
-    style: 'single',
-    images: [],
-    content: ''
-  })
-}
 
 // 照護方式段落儲存
 const careStore = reactive([
-  {
-    id: 0,
-    style: 'single',
-    images: [],
-    content: ''
-  }
+  ...productDetail.value.care.map((obj, id) => {
+    return {
+      id,
+      style: obj.style,
+      images: obj.images,
+      content: obj.content
+    }
+  })
 ])
 // 更新 package style 設定
 const updateCareStyle = (id, value) => {
@@ -272,19 +320,16 @@ const updateCareImages = (id, modalImages) => {
     .map((obj) => obj.link)
   store.splice(0, store.length, ...targets)
 }
-// 新增照護方式段落
-const addCare = () => {
-  careStore.push({
-    id: careStore.length,
-    style: 'single',
-    images: [],
-    content: ''
-  })
+
+// 刪除產品
+const deleteDetail = async () => {
+  await deleteProductDetail($id, params.catalog, params.title)
 }
 
-// 送出表單 (新增)
+// 送出表單 (修改)
 const submitForm = async () => {
   const postData = {}
+  postData.id = $id.value
   // outline
   postData.title = outlineStore.title
   postData.image = outlineStore.image
@@ -293,8 +338,10 @@ const submitForm = async () => {
   postData.price = outlineStore.price
   postData.stock = outlineStore.stock
   // more detail
-  postData.sliders = detailSetting.sliders
+  postData.slides = toRaw(detailSetting.slides)
   postData.dep = detailSetting.dep
+  postData.notes = detailSetting.notes
+  postData.purchase = detailSetting.purchase
   postData.size = detailSetting.size
   // plants type setting
   postData.diff = plantsDetailSetting.diff
@@ -305,31 +352,46 @@ const submitForm = async () => {
   postData.package = toRaw(packageStore)
   postData.care = toRaw(careStore)
 
-  await postProductDetail(postData)
+  await putProductDetail(params.catalog, params.title, postData)
 }
 </script>
 
 <template>
   <div class="mx-auto max-w-2xl px-4">
     <form @submit.prevent="submitForm">
-      <div class="mb-4 flex justify-between">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-          新增產品
+      <div class="mb-4">
+        <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">
+          編輯產品
         </h2>
-        <button
-          type="submit"
-          class="flex items-center justify-center rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-        >
-          <CheckIcon class="mr-2 h-4 w-4" />
-          送出產品
-        </button>
+        <div class="flex items-center justify-between">
+          <h1 class="text-l font-bold text-gray-900 dark:text-white">
+            {{ productDetail?.outline?.title }}
+          </h1>
+          <div class="grid grid-cols-2 gap-4">
+            <button
+              type="button"
+              class="flex items-center justify-center rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+              @click.prevent="deleteDetail"
+            >
+              <TrashIcon class="mr-2 h-4 w-4" />
+              刪除產品
+            </button>
+            <button
+              type="submit"
+              class="flex items-center justify-center rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+            >
+              <CheckIcon class="mr-2 h-4 w-4" />
+              修改產品
+            </button>
+          </div>
+        </div>
       </div>
-      <pre>{{ outlineStore }}</pre>
+      <!-- <pre>{{ outlineStore }}</pre>
       <pre>{{ detailSetting }}</pre>
-      <pre>{{ plantsDetailSetting }}</pre>
+      <pre>{{ plantsDetailSetting }}</pre> -->
       <ProductOutline
         :outline="outlineStore"
-        :catalogs="productCatalogs"
+        :catalog="productCatalog"
         @update-title="updateOutlineTitle"
         @update-catalog="updateOutlineCatalog"
         @update-type="updateOutlineType"
@@ -352,8 +414,8 @@ const submitForm = async () => {
             請選擇圖片
           </button>
         </div>
-        <ul v-if="detailSetting.sliders" class="grid sm:grid-cols-4 sm:gap-6">
-          <li v-for="(src, key) in detailSetting.sliders" :key="key">
+        <ul v-if="detailSetting.slides" class="grid sm:grid-cols-4 sm:gap-6">
+          <li v-for="(src, key) in detailSetting.slides" :key="key">
             <img :src="src" alt="" />
           </li>
         </ul>
@@ -373,6 +435,35 @@ const submitForm = async () => {
           required
         ></textarea>
       </div>
+      <div class="mt-4 sm:col-span-2 sm:mt-6">
+        <label
+          for="notes"
+          class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >購物須知</label
+        >
+        <textarea
+          id="notes"
+          v-model="detailSetting.notes"
+          rows="4"
+          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
+          placeholder="請輸入購物須知"
+          required
+        ></textarea>
+      </div>
+      <div class="mt-4 sm:col-span-2 sm:mt-6">
+        <label
+          for="purchase"
+          class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >加購商品</label
+        >
+        <Multiselect
+          v-model="detailSetting.purchase"
+          mode="tags"
+          placeholder="請選擇加購商品"
+          :close-on-select="false"
+          :options="productPurchase"
+        />
+      </div>
       <div class="mt-4 flex gap-4 sm:col-span-2 sm:mt-6 sm:gap-6">
         <div class="w-full">
           <label
@@ -388,11 +479,13 @@ const submitForm = async () => {
             required
           >
             <option value="" selected disabled hidden>請選擇產品尺寸</option>
-            <option value="s">S ( 15 cm 以下 )</option>
-            <option value="m">M ( 15 - 59 cm )</option>
-            <option value="l">L ( 60 - 149 cm )</option>
-            <option value="xl">XL ( 150 - 199 cm )</option>
-            <option value="xxl">XXL ( 200 cm 以上 )</option>
+            <option
+              v-for="(option, key) in productSize"
+              :key="key"
+              :value="option.size"
+            >
+              {{ option.size }}
+            </option>
           </select>
         </div>
         <div v-if="outlineStore.type == 'plants'" class="w-full">
@@ -409,10 +502,13 @@ const submitForm = async () => {
             required
           >
             <option value="" selected disabled hidden>請選擇種植難易度</option>
-            <option value="初學者">初學者</option>
-            <option value="簡單">簡單</option>
-            <option value="中等">中等</option>
-            <option value="困難">困難</option>
+            <option
+              v-for="(option, key) in productDiff"
+              :key="key"
+              :value="option.diff"
+            >
+              {{ option.diff }}
+            </option>
           </select>
         </div>
         <div v-if="outlineStore.type == 'plants'" class="w-full">
@@ -429,9 +525,13 @@ const submitForm = async () => {
             required
           >
             <option value="" selected disabled hidden>請選擇適合環境</option>
-            <option value="室內">室內</option>
-            <option value="室外">室外</option>
-            <option value="不限">不限</option>
+            <option
+              v-for="(option, key) in productEnv"
+              :key="key"
+              :value="option.env"
+            >
+              {{ option.env }}
+            </option>
           </select>
         </div>
       </div>
@@ -445,12 +545,6 @@ const submitForm = async () => {
           @update-content="updateParagraphContent"
           @update-images="updateParagraphImages"
         />
-        <div
-          class="mx-auto mt-8 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-primary-700 text-white"
-          @click="addParagraph"
-        >
-          <PlusIcon class="h-5 w-5" />
-        </div>
       </div>
       <div class="mt-4 sm:mt-6">
         <h2 class="text-l font-bold text-gray-900 dark:text-white">包裝服務</h2>
@@ -462,12 +556,6 @@ const submitForm = async () => {
           @update-content="updatePackageContent"
           @update-images="updatePackageImages"
         />
-        <div
-          class="mx-auto mt-8 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-primary-700 text-white"
-          @click="addPackage"
-        >
-          <PlusIcon class="h-5 w-5" />
-        </div>
       </div>
       <div class="mt-4 sm:mt-6">
         <h2 class="text-l font-bold text-gray-900 dark:text-white">照護方式</h2>
@@ -479,12 +567,6 @@ const submitForm = async () => {
           @update-content="updateCareContent"
           @update-images="updateCareImages"
         />
-        <div
-          class="mx-auto mt-8 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-primary-700 text-white"
-          @click="addCare"
-        >
-          <PlusIcon class="h-5 w-5" />
-        </div>
       </div>
     </form>
     <ModalSelectImage
@@ -496,7 +578,7 @@ const submitForm = async () => {
       @toggle-modal="toggleOutlineModal"
     />
     <ModalSelectImage
-      v-show="slidersModalState"
+      v-show="slidesModalState"
       :images="selectedSlidersImage"
       :limit="6"
       @update-image="updateSlidersImage"
@@ -506,3 +588,7 @@ const submitForm = async () => {
     />
   </div>
 </template>
+
+<style scoped>
+@import '@vueform/multiselect/themes/default.css';
+</style>

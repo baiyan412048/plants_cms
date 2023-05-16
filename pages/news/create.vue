@@ -1,7 +1,7 @@
 <script setup>
 import { CheckIcon, PlusIcon } from '@heroicons/vue/24/solid'
 
-import { useNewsCatalogs, useNewsDetail } from '@/stores/news'
+import { useNewsCatalog, useNewsDetail } from '@/stores/news'
 import { useMedia } from '@/stores/media'
 
 // media store
@@ -11,12 +11,12 @@ const { getMediaImages } = mediaStore
 const mediaImagesTemp = await getMediaImages()
 
 // 最新消息分類 store
-const newsCatalogsStore = useNewsCatalogs()
+const newsCatalogStore = useNewsCatalog()
 // 最新消息分類 method
-const { getNewsCatalogs } = newsCatalogsStore
+const { getNewsCatalog } = newsCatalogStore
 // 最新消息分類
-const { data: catalog } = await getNewsCatalogs()
-const newsCatalogs = computed(() => catalog.value.data)
+const { data: catalog } = await getNewsCatalog()
+const newsCatalog = computed(() => catalog.value.data)
 
 // 最新消息建立 store
 const newsDetailStore = useNewsDetail()
@@ -159,7 +159,7 @@ const submitForm = async () => {
       </div>
       <NewsOutline
         :outline="outlineStore"
-        :catalogs="newsCatalogs"
+        :catalog="newsCatalog"
         @update-title="updateOutlineTitle"
         @update-catalog="updateOutlineCatalog"
         @toggle-modal="toggleOutlineModal"

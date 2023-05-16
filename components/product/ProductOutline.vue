@@ -6,7 +6,7 @@ const props = defineProps({
       return {}
     }
   },
-  catalogs: {
+  catalog: {
     type: Array,
     default() {
       return []
@@ -64,9 +64,9 @@ const stock = computed(() => props.outline?.stock)
         required
         @change="$emit('updateCatalog', $event.target.value)"
       >
-        <option value="" selected disabled hidden>請選擇產品分類</option>
+        <option selected disabled hidden>請選擇產品分類</option>
         <option
-          v-for="(option, key) in props.catalogs"
+          v-for="(option, key) in props.catalog"
           :key="key"
           :value="option.catalog"
         >
